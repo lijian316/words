@@ -111,7 +111,7 @@ async function saveHashSnapshot(currentHash: string, previousHash: string | null
 
   index.push({ hash: currentHash, key: backupKey, createdAt })
 
-  if (index.length > 10) {
+  if (index.length > 15) {
     index.sort((a, b) => a.createdAt - b.createdAt)
     const removed = index.splice(0, index.length - 10)
     for (const item of removed) {
@@ -374,6 +374,8 @@ export function useInit() {
         runtimeStore.isNew = r ? APP_VERSION.version > Number(r) : true
       })
     }
+
+    runtimeStore.isError = Supabase.getStatus().status === 'error'
     window.umami?.track('host', { host: window.location.host })
   }
 

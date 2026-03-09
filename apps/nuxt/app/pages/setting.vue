@@ -687,9 +687,20 @@ function removeSbConfig() {
               <IconFluentDatabasePerson20Regular />
               <span>{{ $t('data_management') }}</span>
             </div>
-            <div class="tab" :class="tabIndex === 6 && 'active'" @click="tabIndex = 6">
+            <div
+              class="tab"
+              :class="tabIndex === 6 && 'active'"
+              @click="
+                () => {
+                  tabIndex = 6
+                  runtimeStore.isNew = false
+                  set(APP_VERSION.key, APP_VERSION.version)
+                }
+              "
+            >
               <IconFluentCloudSync20Regular />
               <span>数据同步</span>
+              <div class="red-point" v-if="runtimeStore.isError || runtimeStore.isNew"></div>
             </div>
             <div class="tab" :class="tabIndex === 7 && 'active'" @click="tabIndex = 7">
               <IconFluentKeyboardLayoutFloat20Regular />
@@ -701,14 +712,14 @@ function removeSbConfig() {
               @click="
                 () => {
                   tabIndex = 8
-                  runtimeStore.isNew = false
-                  set(APP_VERSION.key, APP_VERSION.version)
+                  // runtimeStore.isNew = false
+                  // set(APP_VERSION.key, APP_VERSION.version)
                 }
               "
             >
               <IconFluentTextBulletListSquare20Regular />
               <span>{{ $t('update_log') }}</span>
-              <div class="red-point" v-if="runtimeStore.isNew"></div>
+<!--              <div class="red-point" v-if="runtimeStore.isNew"></div>-->
             </div>
             <div class="tab" :class="tabIndex === 9 && 'active'" @click="tabIndex = 9">
               <IconFluentPerson20Regular />
@@ -794,9 +805,9 @@ function removeSbConfig() {
               </Form>
               <div class="flex justify-end">
                 <BaseButton @click="removeSbConfig" :disabled="!canSyncToServe">删除配置</BaseButton>
-                <BaseButton @click="openSupabaseSaveGate" :loading="configLoading" :disabled="!canSyncToServe"
-                  >保存配置</BaseButton
-                >
+                <BaseButton @click="openSupabaseSaveGate" :loading="configLoading" :disabled="!canSyncToServe">{{
+                  runtimeStore.isError ? '重试' : '保存配置'
+                }}</BaseButton>
               </div>
               <div
                 class="absolute top-0 left-0 w-full h-full bg-white opacity-80 cursor-not-allowed z-10 center rounded-md"
@@ -859,9 +870,9 @@ function removeSbConfig() {
 
   <BackupGateDialog v-model="showBackupGate">
     <template v-slot="{ disabled }">
-      <BaseButton @click="doSaveSbConfig" :disabled="disabled" v-if="pendingNextAction === 'supabase_save'"
-        >保存配置</BaseButton
-      >
+      <BaseButton @click="doSaveSbConfig" :disabled="disabled" v-if="pendingNextAction === 'supabase_save'">{{
+        runtimeStore.isError ? '重试' : '保存配置'
+      }}</BaseButton>
       <BaseButton
         v-else-if="pendingNextAction === 'restore_history'"
         @click="restoreHistoryData"
@@ -886,12 +897,12 @@ function removeSbConfig() {
 
   <Dialog v-model="showHistoryDialog" title="历史数据">
     <div class="p-4 w-120 max-h-100 overflow-auto">
-      <div v-if="!historyBackups.length" class="text-sm color-gray">暂无历史数据</div>
+      <div v-if="!historyBackups.length" class="color-gray">暂无历史数据</div>
       <div v-else class="flex flex-col gap-3">
         <div v-for="item in historyBackups" :key="item.key" class="border rounded-md">
-          <div class="text-sm">版本号：{{ item.hash }}</div>
-          <div class="text-sm color-gray">上一个版本：{{ item.previousHash || '-' }}</div>
-          <div class="text-sm color-gray">自动备份时间：{{ formatHistoryTime(item.createdAt) }}</div>
+          <div class="">版本号：{{ item.hash }}</div>
+          <div class="color-gray">上一个版本：{{ item.previousHash || '-' }}</div>
+          <div class="color-gray">自动备份时间：{{ formatHistoryTime(item.createdAt) }}</div>
           <div class="mt-2">
             <BaseButton @click="openHistoryRestoreGate(item)" :disabled="restoreLoading">恢复此版本</BaseButton>
           </div>
@@ -902,10 +913,10 @@ function removeSbConfig() {
 
   <Dialog v-model="showSbFirstSyncChoiceDialog" title="检测到远程已有数据">
     <div class="p-4 w-120">
-      <div class="text-sm">检测到远程存在数据，请选择同步方向：</div>
-      <div class="text-sm color-gray mt-2">- 本地推送：用当前本地数据覆盖远程</div>
-      <div class="text-sm color-gray">- 拉取远程：用远程数据覆盖当前本地</div>
-      <div class="flex justify-end gap-space">
+      <div class="">检测到远程存在数据，请选择同步方向：</div>
+      <div class="color-gray mt-2">- 本地推送：用当前本地数据覆盖远程</div>
+      <div class="color-gray">- 拉取远程：用远程数据覆盖当前本地</div>
+      <div class="flex justify-end mt-4">
         <BaseButton :loading="sbSyncChoiceLoading" @click="onSbFirstSyncChoice('push_local')">本地推送</BaseButton>
         <BaseButton :loading="sbSyncChoiceLoading" @click="onSbFirstSyncChoice('pull_remote')">拉取远程</BaseButton>
       </div>

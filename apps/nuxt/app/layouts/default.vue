@@ -82,7 +82,7 @@ const showIcon = $computed(() => {
         <NuxtLink to="/setting" class="row">
           <IconFluentSettings20Regular />
           <span>{{ $t('setting') }}</span>
-          <div class="red-point" :class="!settingStore.sideExpand && 'top-1 right-0'" v-if="runtimeStore.isNew"></div>
+          <div class="red-point" :class="!settingStore.sideExpand && 'top-1 right-0'"  v-if="runtimeStore.isNew || runtimeStore.isError"></div>
         </NuxtLink>
         <NuxtLink to="/feedback" class="row">
           <IconFluentCommentEdit20Regular />
@@ -127,7 +127,7 @@ const showIcon = $computed(() => {
         <div class="nav-item" @click="router.push('/setting')" :class="{ active: route.path === '/setting' }">
           <IconFluentSettings20Regular />
           <span>设置</span>
-          <div class="red-point" v-if="runtimeStore.isNew"></div>
+          <div class="red-point" v-if="runtimeStore.isNew || runtimeStore.isError"></div>
         </div>
       </div>
       <div class="nav-toggle" @click="settingStore.mobileNavCollapsed = !settingStore.mobileNavCollapsed">

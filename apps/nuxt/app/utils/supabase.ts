@@ -114,6 +114,8 @@ export class Supabase {
   }
 
   static setStatus(status: SupabaseStatus, statusMessage?: string): void {
+    const runtimeStore = useRuntimeStore()
+    runtimeStore.isError = status === 'error'
     setConfig({ status, statusMessage })
   }
 }
