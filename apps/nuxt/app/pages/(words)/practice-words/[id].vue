@@ -395,10 +395,10 @@ function complete() {
 
 function next(isTyping: boolean = true) {
   let temp = word.word.toLowerCase()
-  if (data.wrongTimes) {
-    data.wrongTimesMap[temp] = (data.wrongTimesMap[temp] ?? 0) + data.wrongTimes
-    data.wrongTimes = 0
-  }
+
+  data.wrongTimesMap[temp] = (data.wrongTimesMap[temp] ?? 0) + data.wrongTimes
+  data.wrongTimes = 0
+  
   // debugger
   if (isTyping) statStore.inputWordNumber++
   if (settingStore.wordPracticeMode === WordPracticeMode.Free) {
