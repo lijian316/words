@@ -18,6 +18,7 @@ import { useSettingStore } from '~/stores/setting.ts'
 import { useUserStore } from '~/stores/user.ts'
 import { CompareResult } from '~/types/enum.ts'
 import { Supabase } from '~/utils/supabase.ts'
+import { debounce } from '~/utils'
 import { useDataSyncPersistence } from '@/composables/useDataSyncPersistence'
 
 let unsub = null

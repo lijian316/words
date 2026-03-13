@@ -1,20 +1,16 @@
 <template>
   <label class="checkbox" @click.stop>
-    <input
-        type="checkbox"
-        :checked="modelValue"
-        @change="change"
-    />
+    <input type="checkbox" :checked="modelValue" @change="change" />
     <span class="checkbox-box">
       <span class="checkbox-inner"></span>
     </span>
-    <span class="checkbox-label"><slot/></span>
+    <span class="checkbox-label"><slot /></span>
   </label>
 </template>
 
 <script setup lang="ts">
 defineProps({
-  modelValue: Boolean
+  modelValue: Boolean,
 })
 
 const emit = defineEmits(['update:modelValue', 'click', 'onChange'])

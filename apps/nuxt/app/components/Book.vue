@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import type { Dict } from "@/types/types";
+import type { Dict } from '@/types/types'
 import Progress from '@/components/base/Progress.vue'
-import Checkbox from "@/components/base/checkbox/Checkbox.vue";
+// import Checkbox from '@/components/base/checkbox/Checkbox.vue'
+import { Checkbox } from '@typewords/ui/components/baase'
+// import { Checkbox } from '@typewords/ui/components/baase/index.ts'
+// import { Radio } from '@typewords/ui/components/baase/index.ts'
 
 interface IProps {
-  item?: Partial<Dict>;
+  item?: Partial<Dict>
   quantifier?: string
   isAdd: boolean
   showCheckbox?: boolean
@@ -15,7 +18,7 @@ interface IProps {
 
 const props = withDefaults(defineProps<IProps>(), {
   showProgress: true,
-  isUser: false
+  isUser: false,
 })
 
 defineEmits<{
@@ -35,29 +38,34 @@ const studyProgress = $computed(() => {
 <template>
   <div :id="item?.id" v-if="!isAdd">
     <div class="book overflow-hidden relative">
-      <NuxtImg class="absolute top-0 left-0 w-full object-cover" v-if="item?.cover" :src='item.cover' alt="" />
+      <NuxtImg class="absolute top-0 left-0 w-full object-cover" v-if="item?.cover" :src="item.cover" alt="" />
       <div class="text-base mt-1" v-else>{{ item?.name }}</div>
       <div class="absolute bottom-4 right-3 z-1" :class="item?.cover && 'color-white'">
         <div>{{ studyProgress }}{{ item?.length }}{{ quantifier }}</div>
       </div>
       <div class="absolute bottom-2 left-3 right-3">
-        <Progress v-if="(item?.lastLearnIndex) && showProgress" class="mt-1"
-                  :percentage="progress"
-                  :show-text="false"></Progress>
+        <Progress
+          v-if="item?.lastLearnIndex && showProgress"
+          class="mt-1"
+          :percentage="progress"
+          :show-text="false"
+        ></Progress>
       </div>
-      <Checkbox v-if="showCheckbox"
-                :model-value="checked"
-                @change="$emit('check')"
-                class="absolute left-3 bottom-3 z-2"/>
+      <Checkbox
+        v-if="showCheckbox"
+        :model-value="checked"
+        @change="$emit('check')"
+        class="absolute left-3 bottom-3 z-2"
+      />
       <div class="custom z-1" v-if="item.custom">{{ $t('custom') }}</div>
-<!--      <div class="custom bg-red! color-white z-1" v-else-if="item.update">更新中</div>-->
-<!--      <div class="sync bg-red! color-white z-1" v-if="!item.sync && isUser && !showCheckbox">未同步</div>-->
+      <!--      <div class="custom bg-red! color-white z-1" v-else-if="item.update">更新中</div>-->
+      <!--      <div class="sync bg-red! color-white z-1" v-if="!item.sync && isUser && !showCheckbox">未同步</div>-->
     </div>
     <div class="text-base mt-1" v-if="item?.cover">{{ item?.name }}</div>
   </div>
   <div v-else class="book" id="no-book">
     <div class="h-full center text-2xl">
-      <IconFluentAdd16Regular/>
+      <IconFluentAdd16Regular />
     </div>
   </div>
 </template>

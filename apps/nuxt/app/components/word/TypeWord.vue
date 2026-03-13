@@ -2,20 +2,21 @@
 import type { Word } from '~/types/types'
 import VolumeIcon from '~/components/icon/VolumeIcon.vue'
 import { useSettingStore } from '~/stores/setting'
+import { useBaseStore } from '~/stores/base'
 import { usePlayBeep, usePlayCorrect, usePlayKeyboardAudio, usePlayWordAudio, useTTsPlayAudio } from '~/hooks/sound'
 import { emitter, EventKey, useEvents } from '~/utils/eventBus'
 import { onMounted, onUnmounted, watch } from 'vue'
 import SentenceHightLightWord from '~/components/word/SentenceHightLightWord.vue'
-import { usePracticeStore } from '~/stores/practice'
 import { getDefaultWord } from '~/types/func'
 import { _nextTick, last } from '~/utils'
 import BaseButton from '~/components/base/BaseButton.vue'
 import Space from '~/components/article/Space.vue'
 import Toast from '~/components/base/toast/Toast'
 import Tooltip from '~/components/base/Tooltip.vue'
-import { ShortcutKey, WordPracticeStage, WordPracticeType } from '~/types/enum'
+import { ShortcutKey, WordPracticeType } from '~/types/enum'
 import { useI18n } from 'vue-i18n'
 import { useWordOptions } from '~/hooks/dict.ts'
+
 const { t: $t } = useI18n()
 
 interface IProps {
@@ -455,7 +456,6 @@ function mouseleave() {
   }, 50)
 }
 
-
 watch([() => input, () => showFullWord, () => settingStore.dictation], checkCursorPosition)
 
 //检测光标位置
@@ -654,7 +654,7 @@ const isCollect = $computed(() => isWordCollect(props.word))
           :keyboard="`${$t('shortcut')}(${settingStore.shortcutKeyMap[ShortcutKey.KnowWord]})`"
           size="large"
           @click="know"
-        >{{ $t('i_know') }}
+          >{{ $t('i_know') }}
         </BaseButton>
         <BaseButton
           :keyboard="`${$t('shortcut')}(${settingStore.shortcutKeyMap[ShortcutKey.UnknownWord]})`"
