@@ -1,29 +1,32 @@
 <script setup lang="ts">
-import { myDictList } from '@/apis'
-import Progress from '@/components/base/Progress.vue'
-import Toast from '@/components/base/toast/Toast.ts'
-import BaseButton from '~/components/base/BaseButton.vue'
-import BaseIcon from '~/components/base/BaseIcon.vue'
-import BasePage from '~/components/base/BasePage.vue'
-import Book from '@/components/Book.vue'
-import DeleteIcon from '@/components/icon/DeleteIcon.vue'
-import PopConfirm from '~/components/base/PopConfirm.vue'
-import { APP_NAME, AppEnv, DICT_LIST, LIB_JS_URL, Old_Host, Origin, TourConfig } from '@/config/env.ts'
-import { useBaseStore } from '@/stores/base.ts'
-import { useRuntimeStore } from '@/stores/runtime.ts'
-import { useSettingStore } from '@/stores/setting.ts'
-import { getDefaultDict } from '@/types/func.ts'
-import type { DictResource } from '@/types/types.ts'
-import { _getDictDataByUrl, _nextTick, isMobile, loadJsLib, msToHourMinute, resourceWrap, total, useNav } from '@/utils'
-import { getPracticeArticleCacheLocal } from '@/utils/cache.ts'
+import { myDictList } from '@typewords/core/apis'
+import { BaseButton, BaseIcon, BasePage, PopConfirm, Progress, Toast } from '@typewords/base'
+import Book from '@typewords/core/components/Book.vue'
+import DeleteIcon from '@typewords/core/components/icon/DeleteIcon.vue'
+import { APP_NAME, AppEnv, DICT_LIST, LIB_JS_URL, Old_Host, Origin, TourConfig } from '@typewords/core/config/env.ts'
+import { useBaseStore } from '@typewords/core/stores/base.ts'
+import { useRuntimeStore } from '@typewords/core/stores/runtime.ts'
+import { useSettingStore } from '@typewords/core/stores/setting.ts'
+import { getDefaultDict } from '@typewords/core/types/func.ts'
+import type { DictResource } from '@typewords/core/types/types.ts'
+import {
+  _getDictDataByUrl,
+  _nextTick,
+  isMobile,
+  loadJsLib,
+  msToHourMinute,
+  resourceWrap,
+  total,
+  useNav,
+} from '@typewords/core/utils'
 import { useFetch } from '@vueuse/core'
 import dayjs from 'dayjs'
 import isBetween from 'dayjs/plugin/isBetween'
 import isoWeek from 'dayjs/plugin/isoWeek'
 import { watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { DictType } from '@/types/enum.ts'
-import { usePracticeArticlePersistence, usePracticeWordPersistence } from '~/composables/usePracticePersistence.ts'
+import { DictType } from '@typewords/core/types/enum.ts'
+import { usePracticeArticlePersistence } from '@typewords/core/composables/usePracticePersistence.ts'
 
 dayjs.extend(isoWeek)
 dayjs.extend(isBetween)
@@ -61,7 +64,7 @@ async function onvisibilitychange() {
   }
 }
 
-onUnmounted(()=>{
+onUnmounted(() => {
   document.removeEventListener('visibilitychange', onvisibilitychange)
 })
 

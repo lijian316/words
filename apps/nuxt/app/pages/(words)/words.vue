@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useBaseStore } from '@/stores/base.ts'
+import { useBaseStore } from '@typewords/core/stores/base.ts'
 import { useRouter } from 'vue-router'
-import BaseIcon from '~/components/base/BaseIcon.vue'
+import { BaseButton, BaseIcon, BasePage, OptionButton, PopConfirm, Progress, Toast } from '@typewords/base'
 import {
   _getAccomplishDate,
   _getDictDataByUrl,
@@ -11,22 +11,17 @@ import {
   resourceWrap,
   shuffle,
   useNav,
-} from '@/utils'
-import BasePage from '~/components/base/BasePage.vue'
-import type { DictResource } from '@/types/types.ts'
+} from '@typewords/core/utils'
+import type { DictResource } from '@typewords/core/types/types.ts'
 import { watch } from 'vue'
-import { getCurrentStudyWord } from '@/hooks/dict.ts'
-import { useRuntimeStore } from '@/stores/runtime.ts'
-import Book from '@/components/Book.vue'
-import PopConfirm from '~/components/base/PopConfirm.vue'
-import Progress from '@/components/base/Progress.vue'
-import Toast from '@/components/base/toast/Toast.ts'
-import BaseButton from '~/components/base/BaseButton.vue'
-import { getDefaultDict } from '@/types/func.ts'
-import DeleteIcon from '@/components/icon/DeleteIcon.vue'
-import PracticeSettingDialog from '~/components/word/PracticeSettingDialog.vue'
-import ChangeLastPracticeIndexDialog from '~/components/word/ChangeLastPracticeIndexDialog.vue'
-import { useSettingStore } from '@/stores/setting.ts'
+import { getCurrentStudyWord } from '@typewords/core/hooks/dict.ts'
+import { useRuntimeStore } from '@typewords/core/stores/runtime.ts'
+import Book from '@typewords/core/components/Book.vue'
+import { getDefaultDict } from '@typewords/core/types/func.ts'
+import DeleteIcon from '@typewords/core/components/icon/DeleteIcon.vue'
+import PracticeSettingDialog from '@typewords/core/components/word/PracticeSettingDialog.vue'
+import ChangeLastPracticeIndexDialog from '@typewords/core/components/word/ChangeLastPracticeIndexDialog.vue'
+import { useSettingStore } from '@typewords/core/stores/setting.ts'
 import { useFetch } from '@vueuse/core'
 import {
   APP_NAME,
@@ -38,15 +33,14 @@ import {
   TourConfig,
   WordPracticeModeNameMap,
   WordPracticeModeUrlMap,
-} from '@/config/env.ts'
-import { myDictList } from '@/apis'
-import PracticeWordListDialog from '~/components/word/PracticeWordListDialog.vue'
-import ShufflePracticeSettingDialog from '~/components/word/ShufflePracticeSettingDialog.vue'
-import { deleteDict } from '@/apis/dict.ts'
-import OptionButton from '@/components/base/OptionButton.vue'
-import { usePracticeWordPersistence } from '@/composables/usePracticePersistence'
-import { WordPracticeMode } from '@/types/enum.ts'
-import type { PracticeWordCache } from '~/utils/cache.ts'
+} from '@typewords/core/config/env.ts'
+import { myDictList } from '@typewords/core/apis'
+import PracticeWordListDialog from '@typewords/core/components/word/PracticeWordListDialog.vue'
+import ShufflePracticeSettingDialog from '@typewords/core/components/word/ShufflePracticeSettingDialog.vue'
+import { deleteDict } from '@typewords/core/apis/dict.ts'
+import { usePracticeWordPersistence } from '@typewords/core/composables/usePracticePersistence'
+import { WordPracticeMode } from '@typewords/core/types/enum.ts'
+import type { PracticeWordCache } from '@typewords/core/utils/cache.ts'
 
 const store = useBaseStore()
 const settingStore = useSettingStore()

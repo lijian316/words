@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import type { Article } from '@/types/types.ts'
-import BaseButton from '~/components/base/BaseButton.vue'
-import { cloneDeep, loadJsLib } from '@/utils'
+import type { Article } from '@typewords/core/types/types.ts'
+import { BaseButton, Toast, MiniDialog } from '@typewords/base'
+import { cloneDeep, loadJsLib } from '@typewords/core/utils'
 
-import List from '@/components/list/List.vue'
-import { useWindowClick } from '@/hooks/event.ts'
-import { MessageBox } from '@/utils/MessageBox.tsx'
-import { useRuntimeStore } from '@/stores/runtime.ts'
+import List from '@typewords/core/components/list/List.vue'
+import { useWindowClick } from '@typewords/core/hooks/event.ts'
+import { MessageBox } from '@typewords/core/utils/MessageBox.tsx'
+import { useRuntimeStore } from '@typewords/core/stores/runtime.ts'
 import { nanoid } from 'nanoid'
-import EditArticle from '@/components/article/EditArticle.vue'
-import Toast from '@/components/base/toast/Toast.ts'
-import { getDefaultArticle } from '@/types/func.ts'
-import BackIcon from '~/components/icon/BackIcon.vue'
-import MiniDialog from '@/components/dialog/MiniDialog.vue'
+import EditArticle from '@typewords/core/components/article/EditArticle.vue'
+import { getDefaultArticle } from '@typewords/core/types/func.ts'
+import BackIcon from '@typewords/core/components/icon/BackIcon.vue'
 import { onMounted } from 'vue'
-import { LIB_JS_URL } from '@/config/env.ts'
-import { syncBookInMyStudyList } from '@/hooks/article.ts'
+import { LIB_JS_URL } from '@typewords/core/config/env.ts'
+import { syncBookInMyStudyList } from '@typewords/core/hooks/article.ts'
 
 const runtimeStore = useRuntimeStore()
 

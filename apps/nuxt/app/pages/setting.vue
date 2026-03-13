@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { defineAsyncComponent, nextTick, ref, watch } from 'vue'
-import { getDefaultSettingState, useSettingStore } from '@/stores/setting'
-import { getShortcutKey, useEventListener } from '@/hooks/event'
-import { checkAndUpgradeSaveDict, checkAndUpgradeSaveSetting, cloneDeep, loadJsLib } from '@/utils'
-import BaseButton from '~/components/base/BaseButton.vue'
-import { getDefaultBaseState, useBaseStore } from '@/stores/base'
+import { getDefaultSettingState, useSettingStore } from '@typewords/core/stores/setting'
+import { getShortcutKey, useEventListener } from '@typewords/core/hooks/event'
+import { checkAndUpgradeSaveDict, checkAndUpgradeSaveSetting, cloneDeep, loadJsLib } from '@typewords/core/utils'
+import { BaseButton, BaseInput, BasePage, Form, FormItem, type FormType, PopConfirm, Toast } from '@typewords/base'
+import { getDefaultBaseState, useBaseStore } from '@typewords/core/stores/base'
 import {
   APP_NAME,
   APP_VERSION,
@@ -17,30 +17,30 @@ import {
   Origin,
   SAVE_DICT_KEY,
   SAVE_SETTING_KEY,
-} from '@/config/env'
-import BasePage from '~/components/base/BasePage.vue'
-import Toast from '@/components/base/toast/Toast'
+} from '@typewords/core/config/env'
 import { get, set } from 'idb-keyval'
-import { useRuntimeStore } from '@/stores/runtime'
-import { useExport } from '@/hooks/export'
-import MigrateDialog from '~/components/dialog/MigrateDialog.vue'
-import Log from '@/components/setting/Log.vue'
-import About from '@/components/About.vue'
-import CommonSetting from '@/components/setting/CommonSetting.vue'
-import FsrsSetting from '@/components/setting/FsrsSetting.vue'
-import ArticleSetting from '@/components/setting/ArticleSetting.vue'
-import WordSetting from '@/components/setting/WordSetting.vue'
-import { PRACTICE_ARTICLE_CACHE, PRACTICE_WORD_CACHE } from '@/utils/cache'
-import { usePracticeWordPersistence, usePracticeArticlePersistence } from '@/composables/usePracticePersistence'
-import { useDataSyncPersistence } from '@/composables/useDataSyncPersistence'
-import SettingItem from '~/components/setting/SettingItem.vue'
-import Form, { type FormType } from '~/components/base/form/Form.vue'
-import { Supabase } from '~/utils/supabase.ts'
-import BackupGateDialog from '@/components/dialog/BackupGateDialog.vue'
+import { useRuntimeStore } from '@typewords/core/stores/runtime'
+import { useExport } from '@typewords/core/hooks/export'
+import MigrateDialog from '@typewords/core/components/dialog/MigrateDialog.vue'
+import Log from '@typewords/core/components/setting/Log.vue'
+import About from '@typewords/core/components/About.vue'
+import CommonSetting from '@typewords/core/components/setting/CommonSetting.vue'
+import FsrsSetting from '@typewords/core/components/setting/FsrsSetting.vue'
+import ArticleSetting from '@typewords/core/components/setting/ArticleSetting.vue'
+import WordSetting from '@typewords/core/components/setting/WordSetting.vue'
+import { PRACTICE_ARTICLE_CACHE, PRACTICE_WORD_CACHE } from '@typewords/core/utils/cache'
+import {
+  usePracticeArticlePersistence,
+  usePracticeWordPersistence,
+} from '@typewords/core/composables/usePracticePersistence'
+import { useDataSyncPersistence } from '@typewords/core/composables/useDataSyncPersistence'
+import SettingItem from '@typewords/core/components/setting/SettingItem.vue'
+import { Supabase } from '@typewords/core/utils/supabase.ts'
+import BackupGateDialog from '@typewords/core/components/dialog/BackupGateDialog.vue'
 import { createClient } from '@supabase/supabase-js'
 import { useRoute } from 'vue-router'
 
-const Dialog = defineAsyncComponent(() => import('@/components/dialog/Dialog.vue'))
+const Dialog = defineAsyncComponent(() => import('@typewords/base/Dialog'))
 
 type HistoryBackupIndexItem = {
   hash: string

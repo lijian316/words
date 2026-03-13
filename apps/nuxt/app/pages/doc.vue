@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import BasePage from '~/components/base/BasePage.vue'
-import BaseButton from '~/components/base/BaseButton.vue'
-import ResourceCard from '@/components/ResourceCard.vue'
-import { APP_NAME, Origin } from '~/config/env.ts'
+import { BaseButton, BasePage } from '@typewords/base'
+import ResourceCard from '@typewords/core/components/ResourceCard.vue'
+import { APP_NAME, Origin } from '@typewords/core/config/env.ts'
 
 let route = useRoute()
 let title = APP_NAME + ' 英语学习资源分享'

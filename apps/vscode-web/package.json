@@ -13,7 +13,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@typewords/ui": "workspace:*",
+    "@typewords/base": "workspace:*",
+    "@typewords/libs": "workspace:*",
+    "@typewords/core": "workspace:*",
     "jszip": "^3.10.1"
   },
   "config": {

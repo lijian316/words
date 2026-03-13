@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import BasePage from '~/components/base/BasePage.vue'
-import BaseButton from '~/components/base/BaseButton.vue'
-import VolumeIcon from '@/components/icon/VolumeIcon.vue'
+import { BaseButton, BasePage, Toast } from '@typewords/base'
+import VolumeIcon from '@typewords/core/components/icon/VolumeIcon.vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useBaseStore } from '@/stores/base.ts'
-import type { Dict, TaskWords, Word } from '@/types/types.ts'
-import { _getDictDataByUrl, shuffle } from '@/utils'
-import { useRuntimeStore } from '@/stores/runtime.ts'
-import { usePlayBeep, usePlayCorrect, usePlayWordAudio } from '@/hooks/sound.ts'
-import Toast from '@/components/base/toast/Toast.ts'
-import { useEvents } from '~/utils/eventBus'
-import { useStartKeyboardEventListener } from '@/hooks/event.ts'
-import { ShortcutKey } from '~/types/enum'
-import { useSettingStore } from '@/stores/setting.ts'
+import { useBaseStore } from '@typewords/core/stores/base.ts'
+import type { Dict, TaskWords, Word } from '@typewords/core/types/types.ts'
+import { _getDictDataByUrl, shuffle } from '@typewords/core/utils'
+import { useRuntimeStore } from '@typewords/core/stores/runtime.ts'
+import { usePlayBeep, usePlayCorrect, usePlayWordAudio } from '@typewords/core/hooks/sound.ts'
+import { useEvents } from '@typewords/core/utils/eventBus'
+import { useStartKeyboardEventListener } from '@typewords/core/hooks/event.ts'
+import { ShortcutKey } from '@typewords/core/types/enum'
+import { useSettingStore } from '@typewords/core/stores/setting.ts'
 
 type Candidate = { word: string; wordObj?: Word; label: string }
 type Question = {
@@ -206,7 +204,7 @@ async function init() {
   }
   if (runtimeStore.routeData.taskWords) {
     let currentStudy: TaskWords = runtimeStore.routeData.taskWords
-    if (currentStudy.review.length ) {
+    if (currentStudy.review.length) {
       testWords = runtimeStore.routeData.taskWords.review
     }
   }

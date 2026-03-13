@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { APP_NAME, GITHUB } from '~/config/env.ts'
-import BaseIcon from '~/components/base/BaseIcon.vue'
-import { getSystemTheme, listenToSystemThemeChange, setTheme, swapTheme } from '~/hooks/theme.ts'
+import { APP_NAME, GITHUB } from '@typewords/core/config/env.ts'
+import { BaseIcon } from '@typewords/base'
+import { getSystemTheme, listenToSystemThemeChange, setTheme, swapTheme } from '@typewords/core/hooks/theme.ts'
+import ChannelIcons from '@typewords/core/components/channel-icons/ChannelIcons.vue'
 
 definePageMeta({
   layout: 'empty',
@@ -205,7 +206,7 @@ const { locales, setLocale, locale } = useI18n()
 
     <div class="line"></div>
     <div class="w-full center gap-4 h-20">
-      <channel-icons type="horizontal" :share="false" />
+      <ChannelIcons type="horizontal" :share="false" />
       <template v-if="locale === 'zh'">
         <a
           href="https://beian.mps.gov.cn/#/query/webSearch?code=51015602001426"
