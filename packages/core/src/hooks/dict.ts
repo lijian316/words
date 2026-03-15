@@ -150,11 +150,10 @@ export function getCurrentStudyWord(): TaskWords {
 
         console.log('fsrs 里 due 到期单词', reviewWords)
 
-        data.review = reviewWords
-          //截取，不能无限制的复习，一下复习几千个太吓人了
+        data.review = shuffle(reviewWords
           .slice(0, totalNeed)
           .map(word => wordMap.get(word))
-          .filter(obj => obj)
+          .filter(obj => obj))
         return data
       }
 
