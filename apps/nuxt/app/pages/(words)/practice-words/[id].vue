@@ -5,10 +5,24 @@ import { useEvents, emitter, EventKey } from '@typewords/core/utils/eventBus'
 import { useSettingStore } from '@typewords/core/stores/setting.ts'
 import { useRuntimeStore } from '@typewords/core/stores/runtime.ts'
 import type { Dict, PracticeData, TaskWords, Word } from '@typewords/core/types/types.ts'
-import { useDisableEventListener, useOnKeyboardEventListener, useStartKeyboardEventListener } from '@typewords/core/hooks/event.ts'
+import {
+  useDisableEventListener,
+  useOnKeyboardEventListener,
+  useStartKeyboardEventListener,
+} from '@typewords/core/hooks/event.ts'
 import useTheme from '@typewords/core/hooks/theme.ts'
 import { getCurrentStudyWord, useWordOptions } from '@typewords/core/hooks/dict.ts'
-import { _getDictDataByUrl, _nextTick, cloneDeep, isMobile, loadJsLib, resourceWrap, shuffle, throttle,debounce  } from '@typewords/core/utils'
+import {
+  _getDictDataByUrl,
+  _nextTick,
+  cloneDeep,
+  isMobile,
+  loadJsLib,
+  resourceWrap,
+  shuffle,
+  throttle,
+  debounce,
+} from '@typewords/core/utils'
 import { useRoute, useRouter } from 'vue-router'
 import Footer from '@typewords/core/components/word/Footer.vue'
 import Panel from '@typewords/core/components/Panel.vue'
@@ -609,6 +623,12 @@ function onKeyDown(e: KeyboardEvent) {
   // console.log('onKeyDown', e)
   switch (e.key) {
     case 'Backspace':
+      if (settingStore.wordPracticeType === WordPracticeType.Identify) {
+        let rIndex = data.excludeWords.findIndex(v => v === word.word)
+        if (rIndex > -1) {
+          data.excludeWords.splice(rIndex, 1)
+        }
+      }
       typingRef.del()
       break
   }
