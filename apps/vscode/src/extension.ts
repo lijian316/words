@@ -74,7 +74,7 @@ class ChatPanel {
       "default-src 'none'",
       `script-src 'nonce-${nonce}' ${cdnUrl} 'unsafe-inline'`,
       `style-src ${cdnUrl} 'unsafe-inline'`,
-      `connect-src ${cdnUrl} ${fileUrl}`,
+      `connect-src ${cdnUrl} ${fileUrl} https://nchwpxoznvqyngnvyghe.supabase.co`,
       'img-src data: https:',
       'media-src https://dict.youdao.com',
       'font-src data:',
