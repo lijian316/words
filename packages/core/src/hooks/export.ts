@@ -17,12 +17,49 @@ import { useSettingStore } from '../stores/setting'
 import { ref } from 'vue'
 import { PRACTICE_ARTICLE_CACHE, PRACTICE_WORD_CACHE } from '../utils/cache'
 import { usePracticeArticlePersistence, usePracticeWordPersistence } from '../composables/usePracticePersistence.ts'
+import type { BackupData } from '../types'
 
 export function useExport() {
   const store = useBaseStore()
   const settingStore = useSettingStore()
 
   let loading = ref(false)
+
+  async function getExportedData() {
+    const wordPersistence = usePracticeWordPersistence()
+    const articlePersistence = usePracticeArticlePersistence()
+
+    let data: BackupData = {
+      version: EXPORT_DATA_KEY.version,
+      val: {
+        setting: {
+          version: SAVE_SETTING_KEY.version,
+          val: settingStore.$state,
+        },
+        dict: {
+          version: SAVE_DICT_KEY.version,
+          val: shakeCommonDict(store.$state),
+        },
+        [PRACTICE_WORD_CACHE.key]: {
+          version: PRACTICE_WORD_CACHE.version,
+          val: {},
+        },
+        [PRACTICE_ARTICLE_CACHE.key]: {
+          version: PRACTICE_ARTICLE_CACHE.version,
+          val: {},
+        },
+      },
+    }
+    let d = await wordPersistence.getLocalDataCompact()
+    if (d) {
+      data.val[PRACTICE_WORD_CACHE.key].val = d
+    }
+    let d1 = await articlePersistence.getLocalDataCompact()
+    if (d1) {
+      data.val[PRACTICE_ARTICLE_CACHE.key].val = d1
+    }
+    return data
+  }
 
   async function exportData(
     notice = '导出成功！',
@@ -31,51 +68,11 @@ export function useExport() {
     if (loading.value) return
     loading.value = true
 
-    const wordPersistence = usePracticeWordPersistence()
-    const articlePersistence = usePracticeArticlePersistence()
-
     try {
       const JSZip = await loadJsLib('JSZip', LIB_JS_URL.JSZIP)
-      let data: any = {
-        version: EXPORT_DATA_KEY.version,
-        val: {
-          setting: {
-            version: SAVE_SETTING_KEY.version,
-            val: settingStore.$state,
-          },
-          dict: {
-            version: SAVE_DICT_KEY.version,
-            val: shakeCommonDict(store.$state),
-          },
-          [PRACTICE_WORD_CACHE.key]: {
-            version: PRACTICE_WORD_CACHE.version,
-            val: {},
-          },
-          [PRACTICE_ARTICLE_CACHE.key]: {
-            version: PRACTICE_ARTICLE_CACHE.version,
-            val: {},
-          },
-          [APP_VERSION.key]: -1,
-        },
-      }
-      let d = await wordPersistence.getLocalDataCompact()
-      if (d) {
-        try {
-          data.val[PRACTICE_WORD_CACHE.key].val = d
-        } catch (e) {}
-      }
-      let d1 = await articlePersistence.getLocalDataCompact()
-      if (d1) {
-        try {
-          data.val[PRACTICE_ARTICLE_CACHE.key].val = d1
-        } catch (e) {}
-      }
-      let r = await get(APP_VERSION.key)
-      data.val[APP_VERSION.key] = r
 
       const zip = new JSZip()
-      zip.file('data.json', JSON.stringify(data))
-
+      zip.file('data.json', JSON.stringify(await getExportedData()))
       const mp3 = zip.folder('mp3')
       const allRecords = await get(LOCAL_FILE_KEY)
       for (const rec of allRecords ?? []) {
@@ -95,5 +92,6 @@ export function useExport() {
   return {
     loading,
     exportData,
+    getExportedData
   }
 }

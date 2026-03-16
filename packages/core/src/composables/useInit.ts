@@ -16,7 +16,7 @@ import { useBaseStore } from '../stores/base.ts'
 import { useRuntimeStore } from '../stores/runtime.ts'
 import { useSettingStore } from '../stores/setting.ts'
 import { useUserStore } from '../stores/user.ts'
-import { CompareResult } from '../types'
+import { CompareResult, Snapshot } from '../types'
 import { Supabase } from '../utils/supabase.ts'
 import { debounce } from '../utils'
 import { useDataSyncPersistence } from './useDataSyncPersistence'
@@ -40,7 +40,7 @@ async function saveHashSnapshot(currentHash: string, previousHash: string | null
   const backupKey = `${BACKUP_KEY}${currentHash}`
   const createdAt = Date.now()
 
-  const snapshot = {
+  const snapshot: Snapshot = {
     meta: {
       currentHash,
       previousHash,
@@ -49,10 +49,12 @@ async function saveHashSnapshot(currentHash: string, previousHash: string | null
     data: {
       dict: await get(SAVE_DICT_KEY.key),
       setting: await get(SAVE_SETTING_KEY.key),
-      appVersion: await get(APP_VERSION.key),
-      practiceWord: import.meta.client ? localStorage.getItem(PRACTICE_WORD_CACHE.key) : null,
-      practiceArticle: import.meta.client ? localStorage.getItem(PRACTICE_ARTICLE_CACHE.key) : null,
+      [PRACTICE_WORD_CACHE.key]: import.meta.client ? localStorage.getItem(PRACTICE_WORD_CACHE.key) : null,
+      [PRACTICE_ARTICLE_CACHE.key]: import.meta.client ? localStorage.getItem(PRACTICE_ARTICLE_CACHE.key) : null,
     },
+  }
+  if (!snapshot.data.dict) {
+    return false
   }
   await set(backupKey, snapshot)
 
@@ -76,6 +78,7 @@ async function saveHashSnapshot(currentHash: string, previousHash: string | null
     }
   }
   await set(BACKUP_INDEX_KEY, index)
+  return true
 }
 
 export function useInit() {
@@ -93,10 +96,11 @@ export function useInit() {
       if (!currentHash) return
 
       const localHash = normalizeHash(await get(WEBSITE_VERSION_HASH))
+      let res = true
       if (localHash !== currentHash) {
-        await saveHashSnapshot(localHash ?? currentHash, '')
+        res = await saveHashSnapshot(localHash ?? currentHash, '')
       }
-      await set(WEBSITE_VERSION_HASH, currentHash)
+      res && (await set(WEBSITE_VERSION_HASH, currentHash))
     } catch (e) {
       console.warn('init hash guard failed', e)
     }
@@ -132,7 +136,7 @@ export function useInit() {
     unsub = store.$subscribe(
       debounce(async (mutation, n) => {
         // 如果正在初始化，不保存数据，避免覆盖
-        if (isInitializing) return
+        if (isInitializing || runtimeStore.globalLoading) return
         console.log('store.$subscribe', mutation, n)
         let data = shakeCommonDict(n)
 
@@ -180,7 +184,7 @@ export function useInit() {
     unsub2?.()
     unsub2 = settingStore.$subscribe(
       debounce(async (mutation, data) => {
-        if (isInitializing) return
+        if (isInitializing || runtimeStore.globalLoading) return
         // console.log('settingStore.$subscribe', mutation, state, isInitializing)
 
         isInitializing = true
@@ -204,14 +208,7 @@ export function useInit() {
     store.load = true
     isInitializing = false // 初始化完成，允许保存数据
 
-    if (settingStore.first) {
-      set(APP_VERSION.key, APP_VERSION.version)
-    } else {
-      get(APP_VERSION.key).then(r => {
-        runtimeStore.isNew = r ? APP_VERSION.version > Number(r) : true
-      })
-    }
-
+    runtimeStore.isNew = APP_VERSION.version > Number(settingStore.webAppVersion)
     runtimeStore.isError = Supabase.getStatus().status === 'error'
     window.umami?.track('host', { host: window.location.host })
   }

@@ -96,13 +96,3 @@ export function getPracticeArticleCacheLocalWithMeta(): LocalCacheResult<Practic
 export function setPracticeArticleCacheLocal(cache: PracticeArticleCache | null, updated_at?: string): void {
   setLocal(PRACTICE_ARTICLE_CACHE, cache, updated_at)
 }
-
-/** @deprecated 使用 usePracticePersistence('article') 的 load/save/clear；兼容用 */
-export function getPracticeArticleCache(): PracticeArticleCache | null {
-  return getPracticeArticleCacheLocal()
-}
-
-/** @deprecated 使用 usePracticePersistence('article') 的 save/clear；兼容用 */
-export function setPracticeArticleCache(cache: PracticeArticleCache | null): void {
-  setPracticeArticleCacheLocal(cache)
-}

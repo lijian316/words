@@ -24,7 +24,7 @@ async function onBackup() {
   <Dialog v-model="model" title="数据备份">
     <div class="flex flex-col gap-3 p-4 w-100">
       <div>
-        进行操作前，请先点击<span class="text-red"> 数据备份 </span>按钮备份当前数据，避免误操作导致数据无法恢复
+        进行下一步操作前，请先点击<span class="text-red font-bold"> 数据备份 </span>按钮备份当前数据，避免误操作导致数据无法恢复
       </div>
 
       <div class="flex justify-end mt-4">

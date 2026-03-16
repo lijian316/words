@@ -1,5 +1,7 @@
 import { DictType, PracticeArticleWordType } from './enum'
 import type { Card, Rating } from 'ts-fsrs'
+import { PRACTICE_ARTICLE_CACHE, PRACTICE_WORD_CACHE } from '../utils/cache'
+import { APP_VERSION } from '../config/env'
 
 export type Word = {
   id?: string
@@ -156,6 +158,32 @@ export interface TaskWords {
   review: Word[]
 }
 
-export interface FSRSData {
-  cardMap: Record<string, Card>
+export interface SaveData {
+
+}
+
+export interface Snapshot {
+  meta: {
+    currentHash: string
+    previousHash: string
+    createdAt: string
+  }
+  data: {
+    dict: string
+    setting: string
+    [PRACTICE_WORD_CACHE.key]: string
+    [PRACTICE_ARTICLE_CACHE.key]: string
+    [APP_VERSION.key]: number
+  }
+}
+
+export interface BackupData {
+  version: number
+  val: {
+    dict: object
+    setting: object
+    [PRACTICE_WORD_CACHE.key]: object
+    [PRACTICE_ARTICLE_CACHE.key]: object
+    [APP_VERSION.key]: object
+  }
 }

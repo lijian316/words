@@ -7,10 +7,11 @@ import { CompareResult, DictType, getDefaultDict, getDefaultWord } from '../type
 import { useRouter } from 'vue-router'
 import { useRuntimeStore } from '../stores/runtime'
 import dayjs from 'dayjs'
-import { AppEnv, DictId, ENV, RESOURCE_PATH, SAVE_DICT_KEY, SAVE_SETTING_KEY } from '../config/env'
+import { APP_VERSION, AppEnv, DictId, ENV, RESOURCE_PATH, SAVE_DICT_KEY, SAVE_SETTING_KEY } from '../config/env'
 import { nextTick } from 'vue'
 import { Toast } from '@typewords/base'
 import duration from 'dayjs/plugin/duration'
+import { get } from 'idb-keyval'
 
 dayjs.extend(duration)
 
@@ -18,7 +19,7 @@ export function no() {
   Toast.warning('未现实')
 }
 
-//检测多余字段，防止人为删除数据，导致数据不完整报错
+//检测多余字段;防止人为删除数据，导致数据不完整报错
 function checkRiskKey(origin: object, target: object) {
   for (const [key, value] of Object.entries(origin)) {
     if (target[key] !== undefined) origin[key] = target[key]
@@ -90,7 +91,7 @@ export function checkAndUpgradeSaveDict(val: any) {
   return defaultState
 }
 
-export function checkAndUpgradeSaveSetting(val: any) {
+export async function checkAndUpgradeSaveSetting(val: any) {
   // console.log(configStr)
   // console.log('s', new Blob([val]).size)
   // val = ''
@@ -108,22 +109,15 @@ export function checkAndUpgradeSaveSetting(val: any) {
       if (typeof state !== 'object') return defaultState
       state.load = false
       let version = Number(data.version)
-      if (version === SAVE_SETTING_KEY.version) {
-        checkRiskKey(defaultState.shortcutKeyMap, state.shortcutKeyMap)
-        delete state.shortcutKeyMap
-        checkRiskKey(defaultState, state)
-        return defaultState
-      } else {
-        if (version === 13) {
-          defaultState.soundType = state.soundType
-        }
-        //为了保持永远是最新的快捷键选项列表，但保留住用户的自定义设置，去掉无效的快捷键选项
-        //例: 2版本，可能有快捷键A。3版本没有了
-        checkRiskKey(defaultState.shortcutKeyMap, state.shortcutKeyMap)
-        delete state.shortcutKeyMap
-        checkRiskKey(defaultState, state)
-        return defaultState
+      if (version === 17) {
+        defaultState.webAppVersion = (await get(APP_VERSION.key)) ?? APP_VERSION.version
       }
+      //为了保持永远是最新的快捷键选项列表，但保留住用户的自定义设置，去掉无效的快捷键选项
+      //例: 2版本，可能有快捷键A。3版本没有了
+      checkRiskKey(defaultState.shortcutKeyMap, state.shortcutKeyMap)
+      delete state.shortcutKeyMap
+      checkRiskKey(defaultState, state)
+      return defaultState
     } catch (e) {
       return defaultState
     }
@@ -214,10 +208,6 @@ export function _nextTick(cb: () => void, time?: number) {
   } else {
     nextTick(cb)
   }
-}
-
-export function _copy(val: string) {
-  navigator.clipboard.writeText(val)
 }
 
 export function _parseLRC(lrc: string): { start: number; end: number; text: string }[] {
@@ -547,4 +537,14 @@ export function shouldFetchRemote(
   if (remoteVersion > currentVersion) return CompareResult.RemoteNewer
   if (remoteVersion < currentVersion) return CompareResult.LocalNewer
   return compareTimestamps(localUpdatedAt, remoteUpdatedAt)
+}
+
+export function isEmpty(obj: any): boolean {
+  if (typeof obj === 'object') {
+    return Object.keys(obj).length === 0
+  }
+  if (Array.isArray(obj)) {
+    return obj.length === 0
+  }
+  return obj === null || obj === undefined || obj === ''
 }

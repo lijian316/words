@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { checkAndUpgradeSaveSetting, cloneDeep } from '../utils'
 import { get } from 'idb-keyval'
-import { AppEnv, DefaultShortcutKeyMap, SAVE_SETTING_KEY } from '../config/env'
+import { APP_VERSION, AppEnv, DefaultShortcutKeyMap, SAVE_SETTING_KEY } from '../config/env'
 import { getSetting } from '../apis'
 import { WordPracticeMode, WordPracticeType } from '../types'
 import type { FSRSParameters } from 'ts-fsrs'
@@ -47,6 +47,7 @@ export interface SettingState {
   shortcutKeyMap: Record<string, string>
   first: boolean
   firstTime: number
+  webAppVersion: number
   load: boolean
   conflictNotice: boolean // 其他脚本/插件冲突提示
   showConflictNotice2: boolean // 其他脚本/插件冲突提示
@@ -59,12 +60,11 @@ export interface SettingState {
   mobileNavCollapsed: boolean // 移动端底部导航栏收缩状态
   ignoreSymbol: boolean // 过滤符号
   practiceSentence: boolean // 练习例句
-  enableFSRS: boolean // 启用FSRS
 
+  enableFSRS: boolean // 启用FSRS
   fsrsEasyLimit: number // 小于等于fsrsEasyLimit的卡片会评估为Easy
   fsrsGoodLimit: number // 小于等于fsrsEasyLimit且小于等于fsrsHardLimit的卡片会评估为Good
   fsrsHardLimit: number // 小于等于fsrsHardLimit的卡片会评估为Hard
-
   fsrsParameters: FSRSParameters
 }
 
@@ -109,6 +109,7 @@ export const getDefaultSettingState = (): SettingState => ({
   shortcutKeyMap: cloneDeep(DefaultShortcutKeyMap),
   first: true,
   firstTime: Date.now(),
+  webAppVersion: APP_VERSION.version,
   load: false,
   conflictNotice: true,
   showConflictNotice2: true,
@@ -121,8 +122,8 @@ export const getDefaultSettingState = (): SettingState => ({
   mobileNavCollapsed: false,
   ignoreSymbol: true,
   practiceSentence: false,
-  enableFSRS: false,
 
+  enableFSRS: false,
   fsrsEasyLimit: 0,
   fsrsGoodLimit: 3,
   fsrsHardLimit: 6,
@@ -152,7 +153,7 @@ export const useSettingStore = defineStore('setting', {
     init() {
       return new Promise(async resolve => {
         let configStr = await get(SAVE_SETTING_KEY.key)
-        let data = checkAndUpgradeSaveSetting(configStr)
+        let data = await checkAndUpgradeSaveSetting(configStr)
         if (AppEnv.CAN_REQUEST) {
           let res = await getSetting()
           if (res.success) {

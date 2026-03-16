@@ -2,7 +2,13 @@
 import { defineAsyncComponent, nextTick, ref, watch } from 'vue'
 import { getDefaultSettingState, useSettingStore } from '@typewords/core/stores/setting'
 import { getShortcutKey, useEventListener } from '@typewords/core/hooks/event'
-import { checkAndUpgradeSaveDict, checkAndUpgradeSaveSetting, cloneDeep, loadJsLib } from '@typewords/core/utils'
+import {
+  checkAndUpgradeSaveDict,
+  checkAndUpgradeSaveSetting,
+  cloneDeep,
+  isEmpty,
+  loadJsLib,
+} from '@typewords/core/utils'
 import { BaseButton, BaseInput, Form, FormItem, type FormType, PopConfirm, Toast } from '@typewords/base'
 import { getDefaultBaseState, useBaseStore } from '@typewords/core/stores/base'
 import {
@@ -15,8 +21,6 @@ import {
   LOCAL_FILE_KEY,
   Old_Host,
   Origin,
-  SAVE_DICT_KEY,
-  SAVE_SETTING_KEY,
 } from '@typewords/core/config/env'
 import { get, set } from 'idb-keyval'
 import { useRuntimeStore } from '@typewords/core/stores/runtime'
@@ -29,16 +33,13 @@ import FsrsSetting from '@typewords/core/components/setting/FsrsSetting.vue'
 import ArticleSetting from '@typewords/core/components/setting/ArticleSetting.vue'
 import WordSetting from '@typewords/core/components/setting/WordSetting.vue'
 import { PRACTICE_ARTICLE_CACHE, PRACTICE_WORD_CACHE } from '@typewords/core/utils/cache'
-import {
-  usePracticeArticlePersistence,
-  usePracticeWordPersistence,
-} from '@typewords/core/composables/usePracticePersistence'
 import { useDataSyncPersistence } from '@typewords/core/composables/useDataSyncPersistence'
 import SettingItem from '@typewords/core/components/setting/SettingItem.vue'
 import { Supabase } from '@typewords/core/utils/supabase.ts'
 import BackupGateDialog from '@typewords/core/components/dialog/BackupGateDialog.vue'
 import { createClient } from '@supabase/supabase-js'
 import { useRoute } from 'vue-router'
+import type { BackupData, Snapshot } from '@typewords/core'
 import BasePage from '@/z-polyfill/BasePage.vue'
 
 const Dialog = defineAsyncComponent(() => import('@typewords/base/Dialog'))
@@ -69,8 +70,6 @@ const tabIndex = $ref(Number(route?.query?.index ?? 0))
 const settingStore = useSettingStore()
 const runtimeStore = useRuntimeStore()
 const store = useBaseStore()
-const wordPersistence = usePracticeWordPersistence()
-const articlePersistence = usePracticeArticlePersistence()
 const dataSyncPersistence = useDataSyncPersistence()
 
 const config = useRuntimeConfig()
@@ -196,62 +195,49 @@ function resetShortcutKeyMap() {
 let importLoading = $ref(false)
 let configLoading = $ref(false)
 
-const { loading: exportLoading, exportData } = useExport()
+const { loading: exportLoading, exportData, getExportedData } = useExport()
 
-function importJson(str: string) {
+async function importJson(str: string) {
   importLoading = true
-  let obj = {
+  let obj: BackupData = {
     version: -1,
     val: {
       setting: {},
       dict: {},
-      [PRACTICE_WORD_CACHE.key]: {},
-      [PRACTICE_ARTICLE_CACHE.key]: {},
-      [APP_VERSION.key]: {},
+      [PRACTICE_WORD_CACHE.key]: null,
+      [PRACTICE_ARTICLE_CACHE.key]: null,
+      // @deprecated 大版本5废弃
+      [APP_VERSION.key]: null,
     },
   }
   try {
+    debugger
     obj = JSON.parse(str)
     let data = obj.val
-    let settingState = checkAndUpgradeSaveSetting(data.setting)
-    settingState.load = true
-    settingStore.setState(settingState)
-    let baseState = checkAndUpgradeSaveDict(data.dict)
-    baseState.load = true
-    store.setState(baseState)
-    if (obj.version >= 4) {
-      try {
-        let save: any = obj?.val?.[PRACTICE_WORD_CACHE.key] || {}
-        if (save.val && Object.keys(save.val).length > 0) {
-          wordPersistence.save(save.val)
-        } else {
-          wordPersistence.clear()
-        }
-      } catch (e) {
-        //todo 上报
-        wordPersistence.clear()
-      }
-      try {
-        let save: any = obj?.val?.[PRACTICE_ARTICLE_CACHE.key] || {}
-        if (save.val && Object.keys(save.val).length > 0) {
-          articlePersistence.save(save.val)
-        } else {
-          articlePersistence.clear()
-        }
-      } catch (e) {
-        //todo 上报
-        articlePersistence.clear()
-      }
-      try {
-        let r: any = obj?.val?.[APP_VERSION.key] || -1
-        set(APP_VERSION.key, r)
-        runtimeStore.isNew = r ? APP_VERSION.version > Number(r) : true
-      } catch (e) {
-        //todo 上报
+    data.dict.val = checkAndUpgradeSaveDict(data.dict)
+    data.setting.val = await checkAndUpgradeSaveSetting(data.setting)
+    //老版本兼容逻辑
+    if (obj.version === 4) {
+      if (!isEmpty(data?.[APP_VERSION.key])) {
+        data.setting.val.webAppVersion = data?.[APP_VERSION.key]
       }
     }
+    //需在调同步方法前面，同步方法可能报错
+    let hasRemote = Supabase.check()
+    runtimeStore.globalLoading = true
+    const pushOk = await dataSyncPersistence.forcePushLocalDataToRemote(data)
+    runtimeStore.globalLoading = false
+    if (pushOk) {
+      Toast.success('导入数据成功，已强制覆盖远程数据')
+    } else {
+      Toast.success(hasRemote ? '导入数据成功，但推送远程失败' : '导入成功！')
+    }
+    runtimeStore.isNew = APP_VERSION.version > Number(data.setting?.val?.webAppVersion ?? APP_VERSION.version)
+    data.setting.val.load = true
+    settingStore.setState(data.setting.val)
+    data.dict.val.load = true
+    store.setState(data.dict.val)
     showBackupGate = false
-    Toast.success('导入成功！')
   } catch (err) {
     return Toast.error('导入失败！')
   } finally {
@@ -298,7 +284,7 @@ async function importData(e) {
       }
 
       const str = await dataFile.async('string')
-      importJson(str)
+      await importJson(str)
     } catch (e) {
       Toast.error(e?.message || e || '导入失败')
     } finally {
@@ -364,43 +350,34 @@ async function restoreHistoryData() {
   if (restoreLoading) return
   restoreLoading = true
   try {
-    const snapshot = (await get(restoreTarget.key)) as
-      | {
-          data?: {
-            dict?: unknown
-            setting?: unknown
-            appVersion?: unknown
-            practiceWord?: string | null
-            practiceArticle?: string | null
-          }
-        }
-      | undefined
-    if (!snapshot?.data) {
-      Toast.error('历史数据不存在或已损坏')
-      return
+    const { data: val }: Snapshot = await get(restoreTarget.key)
+    debugger
+    let data: BackupData['val'] = {
+      setting: JSON.parse(val.setting),
+      dict: JSON.parse(val.dict),
+      [PRACTICE_WORD_CACHE.key]: JSON.parse(val[PRACTICE_WORD_CACHE.key]),
+      [PRACTICE_ARTICLE_CACHE.key]: JSON.parse(val[PRACTICE_ARTICLE_CACHE.key]),
     }
-    await set(SAVE_DICT_KEY.key, snapshot.data.dict ?? null)
-    await set(SAVE_SETTING_KEY.key, snapshot.data.setting ?? null)
-    await set(APP_VERSION.key, snapshot.data.appVersion ?? null)
-    if (snapshot.data.practiceWord == null) localStorage.removeItem(PRACTICE_WORD_CACHE.key)
-    else localStorage.setItem(PRACTICE_WORD_CACHE.key, snapshot.data.practiceWord)
-    if (snapshot.data.practiceArticle == null) localStorage.removeItem(PRACTICE_ARTICLE_CACHE.key)
-    else localStorage.setItem(PRACTICE_ARTICLE_CACHE.key, snapshot.data.practiceArticle)
-    if (!Supabase.check()) {
-      const forcePushOk = await dataSyncPersistence.forcePushAllLocalToRemote()
-      if (forcePushOk) {
-        Toast.success('历史数据恢复成功，已强制覆盖远程，页面即将刷新')
-      } else {
-        Toast.warning('历史数据已恢复，但远程强制推送未完成，页面即将刷新')
-      }
+    data.dict.val = checkAndUpgradeSaveDict(data.dict)
+    data.setting.val = await checkAndUpgradeSaveSetting(data.setting)
+
+    //需在调同步方法前面，同步方法可能报错
+    let hasRemote = Supabase.check()
+    runtimeStore.globalLoading = true
+    const pushOk = await dataSyncPersistence.forcePushLocalDataToRemote(data)
+    runtimeStore.globalLoading = false
+    if (pushOk) {
+      Toast.success('历史数据恢复成功，已强制覆盖远程数据')
     } else {
-      Toast.success('历史数据恢复成功，页面即将刷新')
+      Toast.success(hasRemote ? '历史数据已恢复，但推送远程失败' : '恢复成功！')
     }
+    runtimeStore.isNew = APP_VERSION.version > Number(data.setting?.val?.webAppVersion ?? APP_VERSION.version)
+    data.setting.val.load = true
+    settingStore.setState(data.setting.val)
+    data.dict.val.load = true
+    store.setState(data.dict.val)
     showBackupGate = false
     showHistoryDialog = false
-    setTimeout(() => {
-      location.reload()
-    }, 1000)
   } catch (error) {
     Toast.error('恢复失败：' + ((error as Error)?.message ?? String(error)))
   } finally {
@@ -414,8 +391,10 @@ async function onSbFirstSyncChoice(action: 'push_local' | 'pull_remote') {
   if (sbSyncChoiceLoading) return
   sbSyncChoiceLoading = true
   try {
+    debugger
     if (action === 'push_local') {
-      const ok = await dataSyncPersistence.forcePushAllLocalToRemote(tempSbInstance)
+      let localData = await getExportedData()
+      const ok = await dataSyncPersistence.forcePushLocalDataToRemote(localData.val, tempSbInstance)
       if (!ok) throw new Error('本地推送失败')
       Toast.success('已将本地数据推送到远程')
     } else {
@@ -425,7 +404,6 @@ async function onSbFirstSyncChoice(action: 'push_local' | 'pull_remote') {
     }
     Supabase.setStatus('success')
     sbStatus = Supabase.getStatus()
-    Toast.success('保存成功')
     Supabase.saveConfig(sbForm?.url, sbForm?.key)
     showSbFirstSyncChoiceDialog = false
     transferOk()
@@ -433,7 +411,7 @@ async function onSbFirstSyncChoice(action: 'push_local' | 'pull_remote') {
     const msg = (error as Error)?.message ?? String(error)
     Supabase.setStatus('error', msg)
     sbStatus = Supabase.getStatus()
-    Toast.error('同步方向操作失败：' + msg)
+    Toast.error('同步失败：' + msg)
   } finally {
     sbSyncChoiceLoading = false
   }
@@ -601,7 +579,7 @@ function removeSbConfig() {
                 () => {
                   tabIndex = 6
                   runtimeStore.isNew = false
-                  set(APP_VERSION.key, APP_VERSION.version)
+                  settingStore.webAppVersion = APP_VERSION.version
                 }
               "
             >
@@ -620,7 +598,7 @@ function removeSbConfig() {
                 () => {
                   tabIndex = 8
                   // runtimeStore.isNew = false
-                  // set(APP_VERSION.key, APP_VERSION.version)
+                  // settingStore.webAppVersion = APP_VERSION.version
                 }
               "
             >
@@ -659,10 +637,7 @@ function removeSbConfig() {
                 $t('import_data_restore')
               }}</BaseButton>
             </SettingItem>
-            <div>
-              请注意，导入数据将<b class="text-red"> 完全覆盖 </b
-              >当前所有数据，请谨慎操作。执行导入操作时，会先自动备份当前数据到您的电脑中，供您随时恢复
-            </div>
+            <div>请注意，导入数据将<b class="text-red"> 完全覆盖 </b>当前所有数据，请谨慎操作。</div>
 
             <!--            新网站同步-->
             <template v-if="isNewHost">
@@ -670,10 +645,7 @@ function removeSbConfig() {
               <SettingItem title="迁移 2study.top 网站数据">
                 <BaseButton @click="openGate('transfer')">迁移</BaseButton>
               </SettingItem>
-              <div>
-                请注意，如果本地已有使用记录，请先备份当前数据，迁移数据后将<b class="text-red"> 完全覆盖 </b
-                >当前所有数据，请谨慎操作。
-              </div>
+              <div>请注意，迁移数据后将<b class="text-red"> 完全覆盖 </b>当前所有数据，请谨慎操作。</div>
             </template>
 
             <div class="line my-3"></div>
@@ -698,10 +670,20 @@ function removeSbConfig() {
               </div>
             </SettingItem>
 
-            <p>
-              Supabase 使用教程：
-              <a href="https://www.kdocs.cn/l/cduLx52XXXgw" target="_blank">https://www.kdocs.cn/l/cduLx52XXXgw</a>
-            </p>
+            <div class="mb-6">
+              <div>
+                Supbase 官网：
+                <a href="https://supabase.com/" target="_blank">https://supabase.com/</a>
+              </div>
+              <div>
+                Supbase 使用教程：
+                <a href="https://www.kdocs.cn/l/cduLx52XXXgw" target="_blank">https://www.kdocs.cn/l/cduLx52XXXgw</a>
+              </div>
+              <div>
+                Supbase 是一个（免费版 500 MB数据库）在线数据库工具，可以用来保存/同步
+                {{ APP_NAME }} 的数据，免费版额度个人已够使用
+              </div>
+            </div>
 
             <div class="relative">
               <Form ref="sbFormRef" :rules="sbFormRules" :model="sbForm">
@@ -811,9 +793,12 @@ function removeSbConfig() {
     <div class="p-4 w-120 max-h-100 overflow-auto">
       <div v-if="!historyBackups.length" class="color-gray">暂无历史数据</div>
       <div v-else class="flex flex-col gap-3">
-        <div v-for="item in historyBackups" :key="item.key" class="border rounded-md">
-          <div class="">版本号：{{ item.hash }}</div>
-          <div class="color-gray">自动备份时间：{{ formatHistoryTime(item.createdAt) }}</div>
+        <div>这里是每次 {{ APP_NAME }} 更新后自动保存的用户数据，如果您的数据被损坏，您可在此尝试恢复</div>
+        <div v-for="item in historyBackups" :key="item.key" class="border rounded-md flex justify-between">
+          <div>
+            <div class="">版本号：{{ item.hash }}</div>
+            <div class="color-gray">自动备份时间：{{ formatHistoryTime(item.createdAt) }}</div>
+          </div>
           <div class="mt-2">
             <BaseButton @click="openHistoryRestoreGate(item)" :disabled="restoreLoading">恢复此版本</BaseButton>
           </div>
@@ -824,7 +809,7 @@ function removeSbConfig() {
 
   <Dialog v-model="showSbFirstSyncChoiceDialog" title="检测到远程已有数据">
     <div class="p-4 w-120">
-      <div class="">检测到远程存在数据，请选择同步方向：</div>
+      <div class="">检测到远端已存在数据，请选择同步方向：</div>
       <div class="color-gray mt-2">- 本地推送：用当前本地数据覆盖远程</div>
       <div class="color-gray">- 拉取远程：用远程数据覆盖当前本地</div>
       <div class="flex justify-end mt-4">
@@ -836,7 +821,6 @@ function removeSbConfig() {
 
   <MigrateDialog v-model="showTransfer" @ok="transferOk" />
 </template>
-
 <style scoped lang="scss">
 .col-line {
   border-right: 2px solid var(--color-line);

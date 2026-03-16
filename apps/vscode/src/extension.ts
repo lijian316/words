@@ -1,6 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode'
+import axios from 'axios'
 
 // WebviewPanel 管理类
 class ChatPanel {
@@ -53,15 +54,17 @@ class ChatPanel {
     }
   }
 
-  private _update() {
+  private async _update() {
     const webview = this._panel.webview
-    this._panel.webview.html = this._getHtmlForWebview(webview)
+    this._panel.webview.html = await this._getHtmlForWebview(webview)
   }
 
-  private _getHtmlForWebview(webview: vscode.Webview) {
+  private async _getHtmlForWebview(webview: vscode.Webview) {
     const cdnUrl = 'https://vs.typewords.cc'
-    // const cdnUrl = 'http://tw.cc'
     const fileUrl = 'https://files.2study.top'
+
+    const res = await axios.get('https://files.2study.top/libs/vs.json')
+    console.log('vs', res.data)
 
     // 生成 nonce 用于 CSP
     const nonce = Buffer.from(Date.now().toString()).toString('base64')
@@ -86,8 +89,8 @@ class ChatPanel {
     <title>New Agent</title>
 
 
-  <script type="module" src="${cdnUrl}/assets/index-CY-8-4fj.js"></script>
-  <link rel="stylesheet" href="${cdnUrl}/assets/index-BXLuKuw9.css">
+  <script type="module" src="${cdnUrl}/assets/${res.data.js}.js"></script>
+  <link rel="stylesheet" href="${cdnUrl}/assets/${res.data.css}.css">
 </head>
 <body>
     <div id="app"></div>
@@ -98,16 +101,15 @@ class ChatPanel {
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand('typewords.helloWorld', () => {
     vscode.window.showInformationMessage('Hello World from TypeW123123ords!')
   })
 
   // 打开聊天面板命令
-  const openChatDisposable = vscode.commands.registerCommand('typewords.openChat', () => {
+  const openChatDisposable = vscode.commands.registerCommand('typewords.openChat', async () => {
     ChatPanel.createOrShow(context.extensionUri)
   })
-
   context.subscriptions.push(disposable, openChatDisposable)
 }
 

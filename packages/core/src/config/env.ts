@@ -68,13 +68,16 @@ export const SAVE_DICT_KEY = {
   key: 'typing-word-dict',
   version: 4,
 }
+//18版本，移除单独保存的 app version字段，转移到 settingStore的webAppVersion里面
 export const SAVE_SETTING_KEY = {
   key: 'typing-word-setting',
-  version: 17,
+  version: 18,
 }
+
+//5版本，不再单独保存 app version字段
 export const EXPORT_DATA_KEY = {
   key: 'typing-word-export',
-  version: 4,
+  version: 5,
 }
 export const LOCAL_FILE_KEY = 'typing-word-files'
 export const WEBSITE_VERSION_HASH = 'type-words-website-version-hash'

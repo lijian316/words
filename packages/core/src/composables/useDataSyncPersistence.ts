@@ -20,10 +20,11 @@ import {
 import { SAVE_DICT_KEY, SAVE_SETTING_KEY } from '../config/env'
 import { useBaseStore } from '../stores/base'
 import { useSettingStore } from '../stores/setting'
-import { DictType, CompareResult } from '../types'
+import { DictType, CompareResult, SaveData, BackupData } from '../types'
 import { Supabase } from '../utils/supabase'
 import { get, set } from 'idb-keyval'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { useRuntimeStore } from '../stores/runtime'
 
 export type SyncType = 'dict' | 'setting' | 'practice_word' | 'practice_article'
 
@@ -127,30 +128,39 @@ function applyDictData(store: ReturnType<typeof useBaseStore>, data: unknown) {
 async function fetchServerMeta(types: SyncType[], client?: SupabaseClient | null): Promise<RemoteMetaRow[] | null> {
   const sb = getSyncClient(client)
   if (!sb) return null
-  const { data, error } = await sb.from('typewords_data').select('type, updated_at, data_version').in('type', types)
-  if (error) {
+  try {
+    const { data, error } = await sb.from('typewords_data').select('type, updated_at, data_version').in('type', types)
+    if (error) {
+      Supabase.setStatus('error', error?.message ?? String(error))
+      return null
+    }
+    return (data ?? []) as RemoteMetaRow[]
+  } catch (error) {
     Supabase.setStatus('error', error?.message ?? String(error))
     return null
   }
-  return (data ?? []) as RemoteMetaRow[]
 }
 
 async function fetchServerData(type: SyncType, client?: SupabaseClient | null): Promise<RemoteDataRow | null> {
   const sb = getSyncClient(client)
   if (!sb) return null
-  const { data, error } = await sb
-    .from('typewords_data')
-    .select('type, data, updated_at, data_version')
-    .eq('type', type)
-    .maybeSingle()
-  if (error) {
+  try {
+    const { data, error } = await sb
+      .from('typewords_data')
+      .select('type, data, updated_at, data_version')
+      .eq('type', type)
+      .maybeSingle()
+    if (error) {
+      Supabase.setStatus('error', error?.message ?? String(error))
+      return null
+    }
+    return data as RemoteDataRow | null
+  } catch (error) {
     Supabase.setStatus('error', error?.message ?? String(error))
-    return null
   }
-  return data as RemoteDataRow | null
 }
 
-async function fetchCompareResultByType(
+async function compareResultByType(
   type: SyncType,
   remoteMetaMap: Map<SyncType, RemoteMetaRow>
 ): Promise<CompareResult> {
@@ -204,7 +214,7 @@ async function applyRemoteDataByType(
   if (!row) return
   const now = new Date().toISOString()
   if (type === 'setting') {
-    const normalized = checkAndUpgradeSaveSetting({
+    const normalized = await checkAndUpgradeSaveSetting({
       val: row.data,
       version: row.data_version,
     })
@@ -227,12 +237,13 @@ async function applyRemoteDataByType(
 export function useDataSyncPersistence() {
   const store = useBaseStore()
   const settingStore = useSettingStore()
+  const runtimeStore = useRuntimeStore()
 
   async function pullIfRemoteNewer(type: SyncType, client?: SupabaseClient | null): Promise<RemoteDataRow | null> {
     const remoteMetas = await fetchServerMeta([type], client)
     if (!remoteMetas) return null
     const remoteMetaMap = new Map(remoteMetas.map(item => [item.type, item]))
-    const compareResult = await fetchCompareResultByType(type, remoteMetaMap)
+    const compareResult = await compareResultByType(type, remoteMetaMap)
     console.log('pullIfRemoteNewer-compareResult', CompareResult[compareResult], type)
     if (compareResult === CompareResult.RemoteNewer) {
       const remoteData = await fetchServerData(type, client)
@@ -248,11 +259,9 @@ export function useDataSyncPersistence() {
     types: SyncType[] = ['setting', 'dict'],
     client?: SupabaseClient | null
   ): Promise<void> {
+    if (runtimeStore.globalLoading) return
     for (const type of types) {
       await pullIfRemoteNewer(type, client)
-    }
-    if (Supabase.getStatus().status !== 'error') {
-      Supabase.setStatus('success')
     }
   }
 
@@ -269,7 +278,7 @@ export function useDataSyncPersistence() {
       return CompareResult.NoRemote
     }
     const remoteMetaMap = new Map(remoteMetas.map(item => [item.type, item]))
-    const compareResult = await fetchCompareResultByType(type, remoteMetaMap)
+    const compareResult = await compareResultByType(type, remoteMetaMap)
     console.log('saveLocalAndSync-compareResult', CompareResult[compareResult], type)
     if (compareResult === CompareResult.RemoteNewer) {
       if (pullWhenRemoteNewer) {
@@ -303,8 +312,13 @@ export function useDataSyncPersistence() {
       { type: 'practice_word', data: practiceWordData, data_version: PRACTICE_WORD_CACHE.version, updated_at },
       { type: 'practice_article', data: practiceArticleData, data_version: PRACTICE_ARTICLE_CACHE.version, updated_at },
     ]
-    const { error } = await (sb as any).from('typewords_data').upsert(rows, { onConflict: 'type' })
-    if (error) {
+    try {
+      const { error } = await (sb as any).from('typewords_data').upsert(rows, { onConflict: 'type' })
+      if (error) {
+        Supabase.setStatus('error', error?.message ?? String(error))
+        return false
+      }
+    } catch (error) {
       Supabase.setStatus('error', error?.message ?? String(error))
       return false
     }
@@ -316,25 +330,71 @@ export function useDataSyncPersistence() {
     return true
   }
 
+  async function forcePushLocalDataToRemote(data: BackupData['val'],client?: SupabaseClient | null): Promise<boolean> {
+    let syncResult = true
+    const updated_at = new Date().toISOString()
+    const sb = getSyncClient(client)
+    if (sb) {
+      const rows: Array<{ type: SyncType; data: unknown; data_version: number; updated_at: string }> = [
+        { type: 'dict', data: data.dict.val, data_version: SAVE_DICT_KEY.version, updated_at },
+        { type: 'setting', data: data.setting.val, data_version: SAVE_SETTING_KEY.version, updated_at },
+        {
+          type: 'practice_word',
+          data: data?.[PRACTICE_WORD_CACHE.key]?.val ?? null,
+          data_version: PRACTICE_WORD_CACHE.version,
+          updated_at,
+        },
+        {
+          type: 'practice_article',
+          data: data?.[PRACTICE_ARTICLE_CACHE.key]?.val ?? null,
+          data_version: PRACTICE_ARTICLE_CACHE.version,
+          updated_at,
+        },
+      ]
+      try {
+        const { error } = await (sb as any).from('typewords_data').upsert(rows, { onConflict: 'type' })
+        if (error) {
+          syncResult = false
+          Supabase.setStatus('error', error?.message ?? String(error))
+        }
+      } catch (error) {
+        syncResult = false
+        Supabase.setStatus('error', error?.message ?? String(error))
+      }
+    } else {
+      syncResult = false
+    }
+    await persistLocalState('dict', data.dict.val, updated_at)
+    await persistLocalState('setting', data.setting.val, updated_at)
+    await persistLocalState('practice_word', data?.[PRACTICE_WORD_CACHE.key]?.val ?? null, updated_at)
+    await persistLocalState('practice_article', data?.[PRACTICE_ARTICLE_CACHE.key]?.val ?? null, updated_at)
+    return syncResult
+  }
+
   async function pullAllRemoteToLocal(client?: SupabaseClient | null): Promise<boolean> {
     const sb = getSyncClient(client)
     if (!sb) return false
-    const { data, error } = await (sb as any)
-      .from('typewords_data')
-      .select('type, data, updated_at, data_version')
-      .in('type', ALL_SYNC_TYPES)
-      .not('data_version', 'is', null)
-    if (error) {
+    try {
+      const { data, error } = await (sb as any)
+        .from('typewords_data')
+        .select('type, data, updated_at, data_version')
+        .in('type', ALL_SYNC_TYPES)
+        .not('data_version', 'is', null)
+      if (error) {
+        Supabase.setStatus('error', error?.message ?? String(error))
+        return false
+      }
+      const rows = (data ?? []) as RemoteDataRow[]
+      const map = new Map(rows.map(item => [item.type, item]))
+      for (const type of ALL_SYNC_TYPES) {
+        await applyRemoteDataByType(type, map.get(type) ?? null, store, settingStore)
+      }
+      Supabase.setStatus('success')
+      return true
+    } catch (error) {
       Supabase.setStatus('error', error?.message ?? String(error))
       return false
     }
-    const rows = (data ?? []) as RemoteDataRow[]
-    const map = new Map(rows.map(item => [item.type, item]))
-    for (const type of ALL_SYNC_TYPES) {
-      await applyRemoteDataByType(type, map.get(type) ?? null, store, settingStore)
-    }
-    Supabase.setStatus('success')
-    return true
   }
 
   function getLocalCompactDataByType(type: SyncType): unknown {
@@ -349,6 +409,7 @@ export function useDataSyncPersistence() {
     pullRemoteIfNewer,
     saveLocalAndSync,
     forcePushAllLocalToRemote,
+    forcePushLocalDataToRemote,
     pullAllRemoteToLocal,
     getLocalCompactDataByType,
   }
