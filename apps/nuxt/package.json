@@ -12,7 +12,6 @@
     "generate-dev": "nuxt generate && node scripts/do.js && node ../../scripts/deploy-eo-pages.js --dir dist --name dev-typeword",
     "preview": "nuxt preview",
     "i18n:write": "gulp i18nWrite",
-    "generate:electron": "nuxt generate"
   },
   "dependencies": {
     "@typewords/base": "workspace:*",

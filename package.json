@@ -12,8 +12,6 @@
     "build-vscode-web": "pnpm -F @typewords/vscode-web build",
     "dev-vscode-web": "pnpm -F @typewords/vscode-web dev",
     "test": "",
-    "dev:electron": "pnpm -F @typewords/electron dev",
-    "build:electron": "pnpm -F @typewords/nuxt generate:electron && pnpm -F @typewords/electron build"
   },
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
