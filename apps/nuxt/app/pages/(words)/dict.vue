@@ -518,7 +518,7 @@ async function requestList({ pageNo, pageSize, searchKey }) {
     // 非自定义词典，直接请求json
 
     //如果没数据则请求
-    if (!allList.length) {
+    if (!allList.length && dict.url) {
       let r = await _getDictDataByUrl(dict)
       allList = r.words
     }

@@ -243,7 +243,7 @@ export async function _getDictDataByUrl(val: DictResource, type: DictType = Dict
     dictResourceUrl = ENV.RESOURCE_URL + `dicts/${val.language}/article/${val.url}`
   }
   let s = await fetch(resourceWrap(dictResourceUrl, val.version)).then(r => r.json())
-  if (s) {
+  if (Array.isArray(s)) {
     if (type === DictType.word) {
       return getDefaultDict({ ...val, words: s })
     } else {

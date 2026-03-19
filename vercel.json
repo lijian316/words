@@ -1,4 +1,4 @@
 {
-  "buildCommand": "pnpm --filter @typewords/nuxt build && mkdir -p .vercel && cp -r apps/nuxt/.vercel/output .vercel/",
+  "buildCommand": "node scripts/download-dicts.mjs && pnpm --filter @typewords/nuxt build && mkdir -p .vercel && cp -r apps/nuxt/.vercel/output .vercel/",
   "installCommand": "pnpm install --no-frozen-lockfile"
 }
