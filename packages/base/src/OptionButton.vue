@@ -6,11 +6,11 @@
       <slot></slot>
     </div>
     <div class="relative group">
-      <div class="more w-10 rounded-r-lg h-full center box-border transition-all duration-300">
+      <div class="more w-10 h-full center box-border transition-all duration-300">
         <IconFluentChevronDown20Regular  color="white"/>
       </div>
       <div
-        class="space-y-2 btn-no-margin pt-2 absolute z-2 right-0 border rounded opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none group-hover:pointer-events-auto"
+        class="space-y-2 btn-no-margin pt-2 absolute z-2 right-0 border rounded-lg opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none group-hover:pointer-events-auto"
       >
         <slot name="options"></slot>
       </div>
@@ -27,6 +27,10 @@
     border-top-right-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
   }
+}
+
+.more {
+  border-radius: 0 0.3rem 0.3rem 0;
 }
 
 .primary-btn {

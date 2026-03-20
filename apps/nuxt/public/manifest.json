@@ -1,6 +1,6 @@
 {
-  "name": "Type Words - 词文记 | 单词跟打 · 文章跟打",
-  "short_name": "",
+  "name": "WordDrill - 单词打字练习 · 背单词神器",
+  "short_name": "WordDrill",
   "start_url": ".",
   "description": "在线英语打字练习平台，支持单词跟打与文章跟打，帮助提升打字速度与英语学习效率。",
   "display": "standalone",

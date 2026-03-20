@@ -566,47 +566,9 @@ function removeSbConfig() {
               <IconFluentBookLetter20Regular />
               <span>{{ $t('article_settings') }}</span>
             </div>
-            <div class="tab" :class="tabIndex === 5 && 'active'" @click="tabIndex = 5">
-              <IconFluentDatabasePerson20Regular />
-              <span>{{ $t('data_management') }}</span>
-            </div>
-            <div
-              class="tab"
-              :class="tabIndex === 6 && 'active'"
-              @click="
-                () => {
-                  tabIndex = 6
-                  runtimeStore.isNew = false
-                  settingStore.webAppVersion = APP_VERSION.version
-                }
-              "
-            >
-              <IconFluentCloudSync20Regular />
-              <span>数据同步</span>
-              <div class="red-point" v-if="runtimeStore.isError || runtimeStore.isNew"></div>
-            </div>
             <div class="tab" :class="tabIndex === 7 && 'active'" @click="tabIndex = 7">
               <IconFluentKeyboardLayoutFloat20Regular />
               <span>{{ $t('shortcut_settings') }}</span>
-            </div>
-            <div
-              class="tab"
-              :class="tabIndex === 8 && 'active'"
-              @click="
-                () => {
-                  tabIndex = 8
-                  // runtimeStore.isNew = false
-                  // settingStore.webAppVersion = APP_VERSION.version
-                }
-              "
-            >
-              <IconFluentTextBulletListSquare20Regular />
-              <span>{{ $t('update_log') }}</span>
-              <!--              <div class="red-point" v-if="runtimeStore.isNew"></div>-->
-            </div>
-            <div class="tab" :class="tabIndex === 9 && 'active'" @click="tabIndex = 9">
-              <IconFluentPerson20Regular />
-              <span>{{ $t('about') }}</span>
             </div>
           </div>
         </div>
@@ -617,95 +579,6 @@ function removeSbConfig() {
           <WordSetting v-if="tabIndex === 2" />
           <ArticleSetting v-if="tabIndex === 3" />
 
-          <div v-if="tabIndex === 5">
-            <!--            导出数据-->
-            <SettingItem
-              title="导出数据"
-              :desc="`${$t('data_saved_locally')}。如果您需要在不同的设备、浏览器上使用 ${APP_NAME}，
-              您需要手动进行数据导出和导入`"
-            >
-              <BaseButton :loading="exportLoading" @click="exportData()">{{ $t('export_data_backup') }}</BaseButton>
-            </SettingItem>
-            <div class="text-gray text-sm">💾 导出的ZIP文件包含所有学习数据，可在其他设备上导入恢复</div>
-            <div class="line my-3"></div>
-
-            <!--            导入数据-->
-            <SettingItem title="导出数据">
-              <BaseButton @click="openGate('import')" :loading="importLoading">{{
-                $t('import_data_restore')
-              }}</BaseButton>
-            </SettingItem>
-            <div>请注意，导入数据将<b class="text-red"> 完全覆盖 </b>当前所有数据，请谨慎操作。</div>
-
-            <!--            新网站同步-->
-            <template v-if="isNewHost">
-              <div class="line my-3"></div>
-              <SettingItem title="迁移 2study.top 网站数据">
-                <BaseButton @click="openGate('transfer')">迁移</BaseButton>
-              </SettingItem>
-              <div>请注意，迁移数据后将<b class="text-red"> 完全覆盖 </b>当前所有数据，请谨慎操作。</div>
-            </template>
-
-            <div class="line my-3"></div>
-            <SettingItem title="其他"> </SettingItem>
-            <div class="flex gap-space">
-              <BaseButton @click="openHistoryDialog">历史数据</BaseButton>
-              <PopConfirm title="该操作将会清除所有数据，确认继续？" @confirm="clearAllData">
-                <BaseButton>清除所有数据</BaseButton>
-              </PopConfirm>
-            </div>
-          </div>
-
-          <div v-if="tabIndex === 6">
-            <!--          Supabase 设置  -->
-            <SettingItem title="Supabase 配置" desc="网站不会上传您的 url 和 key，只保存在浏览器本地(Local storage)">
-              <div v-if="sbStatus.status !== 'idle'" class="mt-2 text-sm">
-                <span v-if="sbStatus.status === 'success'">同步状态：成功</span>
-                <span v-else-if="sbStatus.status === 'error'" class="text-red">
-                  同步状态：失败{{ sbStatus.statusMessage ? `（${sbStatus.statusMessage}）` : '' }}
-                </span>
-                <span v-else-if="sbStatus.status === 'syncing'">同步状态：同步中…</span>
-              </div>
-            </SettingItem>
-
-            <div class="mb-6">
-              <div>
-                Supbase 官网：
-                <a href="https://supabase.com/" target="_blank">https://supabase.com/</a>
-              </div>
-              <div>
-                Supbase 使用教程：
-                <a href="https://www.kdocs.cn/l/cduLx52XXXgw" target="_blank">https://www.kdocs.cn/l/cduLx52XXXgw</a>
-              </div>
-              <div>
-                Supbase 是一个（免费版 500 MB数据库）在线数据库工具，可以用来保存/同步
-                {{ APP_NAME }} 的数据，免费版额度个人已够使用
-              </div>
-            </div>
-
-            <div class="relative">
-              <Form ref="sbFormRef" :rules="sbFormRules" :model="sbForm">
-                <FormItem label="Url" prop="url">
-                  <BaseInput v-model="sbForm.url" />
-                </FormItem>
-                <FormItem label="Key" prop="key">
-                  <BaseInput v-model="sbForm.key" />
-                </FormItem>
-              </Form>
-              <div class="flex justify-end">
-                <BaseButton @click="removeSbConfig" :disabled="!canSyncToServe">删除配置</BaseButton>
-                <BaseButton @click="openSupabaseSaveGate" :loading="configLoading" :disabled="!canSyncToServe">{{
-                  runtimeStore.isError ? '重试' : '保存配置'
-                }}</BaseButton>
-              </div>
-              <div
-                class="absolute top-0 left-0 w-full h-full bg-white opacity-80 cursor-not-allowed z-10 center rounded-md"
-                v-if="!canSyncToServe"
-              >
-                <div class="text-red">检测到自定义文章里面有自定义音频，无法使用同步功能</div>
-              </div>
-            </div>
-          </div>
 
           <div class="body" v-if="tabIndex === 7">
             <div class="row">
@@ -745,13 +618,6 @@ function removeSbConfig() {
             </div>
           </div>
 
-          <!--          日志-->
-          <Log v-if="tabIndex === 8" />
-
-          <div v-if="tabIndex === 9" class="center flex-col">
-            <About />
-            <div class="text-md color-gray mt-10">Build {{ gitLastCommitHash }}</div>
-          </div>
         </div>
       </div>
     </div>

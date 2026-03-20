@@ -1,12 +1,11 @@
 import { offset } from '@floating-ui/dom'
 import { ShortcutKey, WordPracticeMode, WordPracticeStage } from '@typewords/core/types/enum'
 
-export const GITHUB = 'https://github.com/zyronon/TypeWords'
-export const Host = 'typewords.cc'
-export const Old_Host = '2study.top'
-export const EMAIL = 'zyronon@163.com'
+export const GITHUB = 'https://github.com/lijian316/Words'
+export const Host = 'worddrill.app'
+export const Old_Host = 'typewords.cc'
 export const Origin = `https://${Host}`
-export const APP_NAME = 'Type Words'
+export const APP_NAME = 'WordDrill'
 
 const common = {
   word_dict_list_version: 1,

@@ -22,9 +22,14 @@ async function requestList({pageNo, pageSize, searchKey}) {
   }
 }
 
-defineEmits<{
+const emit = defineEmits<{
   ok: [number]
 }>()
+
+function selectIndex(index: number) {
+  emit('ok', index)
+  model.value = false
+}
 </script>
 
 <template>
@@ -41,7 +46,7 @@ defineEmits<{
       >
         <template v-slot="item">
           <WordItem
-              @click="$emit('ok',item.index-1)"
+              @click="selectIndex(item.index - 1)"
               :item="item.item"
               :show-translate="false"
               :index="item.index"

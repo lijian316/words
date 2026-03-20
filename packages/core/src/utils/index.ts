@@ -242,13 +242,20 @@ export async function _getDictDataByUrl(val: DictResource, type: DictType = Dict
   if (type === DictType.article) {
     dictResourceUrl = ENV.RESOURCE_URL + `dicts/${val.language}/article/${val.url}`
   }
-  let s = await fetch(resourceWrap(dictResourceUrl, val.version)).then(r => r.json())
-  if (Array.isArray(s)) {
-    if (type === DictType.word) {
-      return getDefaultDict({ ...val, words: s })
-    } else {
-      return getDefaultDict({ ...val, articles: s })
+  try {
+    const res = await fetch(resourceWrap(dictResourceUrl, val.version))
+    if (!res.ok) return getDefaultDict()
+    const s = await res.json()
+    if (Array.isArray(s)) {
+      if (type === DictType.word) {
+        return getDefaultDict({ ...val, words: s })
+      } else {
+        const articles = s.filter(item => item.id !== undefined)
+        return getDefaultDict({ ...val, articles })
+      }
     }
+  } catch (e) {
+    // ignore fetch/parse errors
   }
   return getDefaultDict()
 }

@@ -1,400 +1,377 @@
 <script setup lang="ts">
-import { APP_NAME, GITHUB } from '@typewords/core/config/env.ts'
-import { BaseIcon } from '@typewords/base'
-import { getSystemTheme, listenToSystemThemeChange, setTheme, swapTheme } from '@typewords/core/hooks/theme.ts'
-import ChannelIcons from '@typewords/core/components/channel-icons/ChannelIcons.vue'
+import { APP_NAME } from '@typewords/core/config/env.ts'
+import { setTheme } from '@typewords/core/hooks/theme.ts'
 
-definePageMeta({
-  layout: 'empty',
-})
-
-let theme = $ref('light')
+definePageMeta({ layout: 'empty' })
 
 onMounted(() => {
-  // 开启监听系统主题变更,后期可以通过用户配置来决定是否开启
-  listenToSystemThemeChange(val => {
-    // 如果系统主题变更后和当前的主题一致，则不需要再重新切换
-    if (theme === val) return
-    theme = val
-    setTheme(theme)
-  })
-  theme = getSystemTheme()
-  console.log('theme', theme)
-  setTheme(theme)
+  setTheme('light')
 })
 
-// 获取当前具体的主题名称
-function getTheme() {
-  // auto模式下，则通过查询系统主题来获取当前具体的主题名称
-  return theme === 'auto' ? getSystemTheme() : theme
+// Typewriter
+const words = ['IELTS', 'GRE', '考研英语', 'CET-6', 'TOEFL', '四六级', '编程词汇', '专业词汇']
+let wordIndex = $ref(0)
+let displayed = $ref('')
+let typing = $ref(true)
+
+onMounted(() => {
+  tick()
+})
+
+function tick() {
+  const w = words[wordIndex]
+  if (typing) {
+    if (displayed.length < w.length) {
+      displayed += w[displayed.length]
+      setTimeout(tick, 100)
+    } else {
+      typing = false
+      setTimeout(tick, 1600)
+    }
+  } else {
+    if (displayed.length > 0) {
+      displayed = displayed.slice(0, -1)
+      setTimeout(tick, 50)
+    } else {
+      typing = true
+      wordIndex = (wordIndex + 1) % words.length
+      setTimeout(tick, 150)
+    }
+  }
 }
 
-function toggleTheme() {
-  // auto模式下，默认是使用系统主题，切换时应该使用当前系统主题为基础进行切换
-  theme = swapTheme((theme === 'auto' ? getSystemTheme() : theme) as any)
-  setTheme(theme)
-}
-
-const { locales, setLocale, locale } = useI18n()
+const floatingCards = [
+  { word: 'persevere',  phonetic: '/pɜːsɪˈvɪə/',    meaning: '坚持不懈', delay: '0s' },
+  { word: 'eloquent',   phonetic: '/ˈeləkwənt/',     meaning: '雄辩的',   delay: '1.5s' },
+  { word: 'ambiguous',  phonetic: '/æmˈbɪɡjuəs/',   meaning: '模糊的',   delay: '3s' },
+  { word: 'tenacious',  phonetic: '/tɪˈneɪʃəs/',    meaning: '顽强的',   delay: '0.8s' },
+  { word: 'diligent',   phonetic: '/ˈdɪlɪdʒənt/',   meaning: '勤奋的',   delay: '2s' },
+  { word: 'lucid',      phonetic: '/ˈluːsɪd/',       meaning: '清晰的',   delay: '0.5s' },
+  { word: 'resilient',  phonetic: '/rɪˈzɪliənt/',    meaning: '有韧性的', delay: '2.5s' },
+  { word: 'concise',    phonetic: '/kənˈsaɪs/',      meaning: '简洁的',   delay: '1.2s' },
+  { word: 'pragmatic',  phonetic: '/præɡˈmætɪk/',    meaning: '务实的',   delay: '3.5s' },
+  { word: 'meticulous', phonetic: '/məˈtɪkjuləs/',   meaning: '一丝不苟的', delay: '1.8s' },
+]
 </script>
+
 <template>
-  <div class="wrapper bg-primary2 text-lg" :class="theme" id="wrapper">
-    <div class="center relative h-14">
-      <div class="flex gap-10">
-        <NuxtLink to="/words" class="black-link">
-          {{ $t('words') }}
-        </NuxtLink>
-        <NuxtLink to="/articles" class="black-link">
-          {{ $t('articles') }}
-        </NuxtLink>
-        <!--        <NuxtLink to="/nce" class="black-link">-->
-        <!--          {{ $t('new_concept_english') }}-->
-        <!--        </NuxtLink>-->
-        <NuxtLink to="/doc" class="black-link">
-          {{ $t('english_document') }}
-        </NuxtLink>
-      </div>
-      <div class="absolute right-6 flex items-center gap-2 color-reverse-black">
-        <NuxtLink to="/help" class="color-reverse-black" aria-label="Help page">
-          <BaseIcon>
-            <IconFluentQuestionCircle20Regular />
-          </BaseIcon>
-        </NuxtLink>
+  <div class="root" id="wrapper">
 
-        <div class="relative group">
-          <div class="more w-10 rounded-r-lg h-full center box-border transition-all duration-300">
-            <IconPhTranslate />
-          </div>
-          <div
-            class="space-y-2 btn-no-margin pt-2 absolute z-2 right-0 opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-150 pointer-events-none group-hover:pointer-events-auto"
-          >
-            <div class="card p-4! space-y-2">
-              <div v-for="locale in locales" @click="setLocale(locale.code)" class="w-full cp break-keep black-link">
-                {{ locale.name }}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <BaseIcon :title="$t('toggle_theme')" @click="toggleTheme">
-          <IconFluentWeatherMoon16Regular v-if="theme === 'light'" />
-          <IconFluentWeatherSunny16Regular v-else />
-        </BaseIcon>
-
-        <a
-          class="flex gap-2 relative color-reverse-black"
-          :href="GITHUB"
-          target="_blank"
-          aria-label="Github project address"
-        >
-          <BaseIcon class="z-1" title="Github" noBg>
-            <IconSimpleIconsGithub />
-          </BaseIcon>
-          <NuxtImg
-            class="z-0 shrink-0 h-8 -ml-4"
-            :src="`https://img.shields.io/github/stars/zyronon/typing-word?style=flat-square&label=%20&color=${theme === 'light' ? 'white' : 'black'}`"
-          />
-        </a>
-      </div>
-    </div>
-    <div class="line"></div>
-
-    <div class="content">
-      <h1>{{ APP_NAME }}</h1>
-      <h2 class="font-normal m-0">{{ $t('app_desc') }}</h2>
-      <div class="">
-        <div class="base-button" @click="navigateTo('/words')">{{ $t('start_word_practice') }}</div>
-        <div class="base-button" @click="navigateTo('/articles')">{{ $t('start_article_practice') }}</div>
+    <!-- ── HERO ── -->
+    <section class="hero">
+      <!-- 背景浮动词卡 -->
+      <div class="orb"></div>
+      <div v-for="(card, i) in floatingCards" :key="i" class="fcard" :style="`--d:${card.delay}`" :class="`fcard-${i}`">
+        <div class="fcard-word">{{ card.word }}</div>
+        <div class="fcard-ph">{{ card.phonetic }}</div>
+        <div class="fcard-cn">{{ card.meaning }}</div>
       </div>
 
-      <div class="w-70vw mb-4 mt-20">
-        <div class="flex gap-10">
-          <div>
-            <div class="text-4xl font-bold mb-8">{{ $t('home_word_practice') }}</div>
-            <ul class="p-0 m-0 list-none space-y-2 max-w-80">
-              <li>{{ $t('home_word_practice_desc1') }}</li>
-              <li>{{ $t('home_word_practice_desc2') }}</li>
-              <li>{{ $t('home_word_practice_desc3') }}</li>
-            </ul>
-          </div>
-          <div class="flex-1">
-            <NuxtImg src="/imgs/words.png" class="rounded-xl w-full" />
-          </div>
+      <!-- 中央内容 -->
+      <div class="hero-body">
+        <div class="brand">
+          <svg width="48" height="48" viewBox="0 0 26 26" fill="none">
+            <rect width="26" height="26" rx="6" fill="url(#g1)" />
+            <text x="13" y="18.5" text-anchor="middle" font-family="system-ui,sans-serif"
+              font-weight="900" font-size="13" fill="white">W</text>
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="26" y2="26">
+                <stop stop-color="#7c3aed" />
+                <stop offset="1" stop-color="#2563eb" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="brand-text">{{ APP_NAME }}</span>
         </div>
-
-        <div class="flex gap-14 w-full mt-30">
-          <div class="flex-1">
-            <NuxtImg src="/imgs/articles.png" class="rounded-xl w-full" />
-          </div>
-          <div>
-            <div class="text-4xl font-bold mb-8  text-right">{{ $t('home_article_practice') }}</div>
-            <ul class="p-0 m-0 list-none space-y-2 max-w-80">
-              <li>{{ $t('home_article_practice_desc1') }}</li>
-              <li>{{ $t('home_article_practice_desc2') }}</li>
-              <li>{{ $t('home_article_practice_desc3') }}</li>
-            </ul>
-          </div>
+        <h1 class="hero-h1">用打字记住</h1>
+        <div class="hero-tw">
+          <span class="tw-word">{{ displayed }}</span>
         </div>
-
-        <div class="text-4xl font-bold mb-8 mt-20 text-center">{{ $t('function_desc') }}</div>
-        <div class="card-wrap">
-          <div class="card1 hover">
-            <div class="emoji">📕</div>
-            <div class="title">{{ $t('home_collection') }}</div>
-            <div class="desc">
-              <ul>
-                <li>{{ $t('home_collection_desc1') }}</li>
-                <li>{{ $t('home_collection_desc2') }}</li>
-                <li>{{ $t('home_collection_desc3') }}</li>
-              </ul>
-            </div>
-          </div>
-          <div class="card1 hover">
-            <div class="emoji">🌐</div>
-            <div class="title">{{ $t('home_vocabulary') }}</div>
-            <div class="desc">{{ $t('home_vocabulary_desc') }}</div>
-          </div>
-          <div class="card1 hover">
-            <div class="emoji">🆓</div>
-            <div class="title">{{ $t('home_free_opensource') }}</div>
-            <div class="desc">
-              <ul>
-                <li>{{ $t('home_free_opensource_desc1') }}</li>
-                <li>{{ $t('home_free_opensource_desc2') }}</li>
-                <li>{{ $t('home_free_opensource_desc3') }}</li>
-              </ul>
-            </div>
-          </div>
+        <p class="hero-p">
+          通过打字练习强化词汇记忆，支持 IELTS、GRE、考研等 240+ 词库，边打字边背单词，让记忆更深刻。
+        </p>
+        <div class="hero-btns">
+          <button class="btn-p" @click="navigateTo('/words')">开始练习</button>
         </div>
-        <div class="card-wrap">
-          <div class="card1 hover">
-            <div class="emoji">⚙️</div>
-            <div class="title">{{ $t('home_customization') }}</div>
-            <div class="desc">
-              <ul>
-                <li>{{ $t('home_customization_desc1') }}</li>
-                <li>{{ $t('home_customization_desc2') }}</li>
-                <li>{{ $t('home_customization_desc3') }}</li>
-              </ul>
-            </div>
-          </div>
-          <div class="card1 hover">
-            <div class="emoji">🎨</div>
-            <div class="title">{{ $t('home_design') }}</div>
-            <div class="desc">
-              <ul>
-                <li>{{ $t('home_design_desc1') }}</li>
-                <li>{{ $t('home_design_desc2') }}</li>
-                <li>{{ $t('home_design_desc3') }}</li>
-              </ul>
-            </div>
-          </div>
-          <div class="card1 hover">
-            <div class="emoji">🎯</div>
-            <div class="title">{{ $t('home_personalized') }}</div>
-            <div class="desc">
-              <ul>
-                <li>{{ $t('home_personalized_desc1') }}</li>
-                <li>{{ $t('home_personalized_desc2') }}</li>
-                <li>{{ $t('home_personalized_desc3') }}</li>
-              </ul>
-            </div>
-          </div>
+        <div class="hero-stats">
+          <div class="stat"><span class="stat-n">240+</span><span class="stat-l">词库</span></div>
+          <div class="stat-div"></div>
+          <div class="stat"><span class="stat-n">6</span><span class="stat-l">练习模式</span></div>
+          <div class="stat-div"></div>
+          <div class="stat"><span class="stat-n">免费</span><span class="stat-l">开源</span></div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="line"></div>
-    <div class="w-full center gap-4 h-20">
-      <ChannelIcons type="horizontal" :share="false" />
-      <template v-if="locale === 'zh'">
-        <a
-          href="https://beian.mps.gov.cn/#/query/webSearch?code=51015602001426"
-          target="_blank"
-          class="black-link text-sm"
-          >{{ $t('cn_limit_no1') }}
-        </a>
-        <a href="https://beian.miit.gov.cn/" class="black-link text-sm" target="_blank">{{ $t('cn_limit_no2') }}</a>
-      </template>
-    </div>
+
   </div>
 </template>
 
 <style scoped lang="scss">
-.wrapper {
-  --color-bg: #e6e8eb;
-  --color-card1-bg: #f6f6f7;
-  --color-line: #cecece;
-  --color-h2: rgb(91, 91, 91);
-  --accent: #818cf8;
-  --accent-2: #60a5fa;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+/* ── TOKENS ── */
+html, body {
+  overflow: hidden;
+  height: 100%;
 }
 
-.wrapper.dark {
-  --color-bg: #0e1217;
-  --color-card1-bg: #202127;
-  --color-line: #333333;
-  --color-h2: rgb(151, 151, 151);
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+.root {
+  height: 100vh;
+  overflow: hidden;
+  --bg: #f4f4f8;
+  --bg2: #ececf4;
+  --surf: #ffffff;
+  --surf2: #f0f0f8;
+  --bdr: rgba(0, 0, 0, 0.08);
+  --bdr-h: rgba(124, 58, 237, 0.4);
+  --txt: #0a0a14;
+  --txt2: #666688;
+  --txt3: #aaaacc;
+  --accent: #7c3aed;
+  --accent2: #2563eb;
+  --glow: rgba(124, 58, 237, 0.12);
 
-  :deep(.github) {
-    color: white !important;
-  }
+  background: var(--bg);
+  color: var(--txt);
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  min-height: 100vh;
 }
 
-.wrapper {
-  font-family:
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    Segoe UI,
-    Roboto,
-    Helvetica,
-    Arial,
-    'Apple Color Emoji',
-    'Segoe UI Emoji';
-  //color: var(--color-card-text);
 
-  .content {
-    @apply mt-16 flex flex-col items-center gap-8;
-
-    .card-wrap {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      margin-bottom: 1.2rem;
-      gap: 1rem;
-    }
-  }
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
 }
 
-h1 {
-  font-size: 4.8rem !important;
-  line-height: 1.6;
-  background: linear-gradient(120deg, #bd34fe 30%, #41d1ff);
-  -webkit-text-fill-color: transparent;
+.brand-text {
+  font-weight: 800;
+  font-size: 1.75rem;
+  color: var(--txt);
+  letter-spacing: -0.03em;
+}
+
+/* ── HERO ── */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.5rem;
+  max-width: 560px;
+  padding: 0 1.5rem;
+}
+
+.hero-tag {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.3rem 0.875rem;
+  border-radius: 999px;
+  border: 1px solid var(--bdr);
+  background: var(--surf);
+  font-size: 0.8rem;
+  color: var(--txt2);
+}
+
+.hero-h1 {
+  margin: 0;
+  font-size: clamp(2.8rem, 5vw, 4.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: var(--txt);
+}
+
+.hero-tw {
+  font-size: clamp(2.8rem, 6vw, 4.2rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  height: 1.15em;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.05em;
+}
+
+.tw-word {
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
   -webkit-background-clip: text;
-  @apply m-0 font-bold color-transparent bg-clip-text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.card1 {
-  @apply w-auto relative rounded-xl p-5 box-border flex flex-col items-start gap-2 mb-0;
-  //background: var(--color-second);
-  background: var(--color-card1-bg);
-  //border: 1px solid var(--color-line);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
 
-  &.hover:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  }
 
-  .title {
-    @apply font-bold;
-  }
-
-  .emoji {
-    @apply inline-block bg-third rounded-lg p-1.5 text-xl;
-  }
-
-  ul {
-    @apply mt-0 pl-0 list-none;
-  }
+.cursor {
+  -webkit-text-fill-color: #7c3aed;
+  animation: blink 1s step-end infinite;
+  font-weight: 200;
 }
 
-.base-button {
-  @apply inline-flex items-center justify-center outline-none text-center transition-all duration-200 user-select-none
-   vertical-align-middle whitespace-nowrap rounded-lg cp text-white p-x-5 h-11;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  box-shadow: 0 8px 20px rgba(129, 140, 248, 0.25);
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
-.base-button + .base-button {
-  @apply ml-8;
+.hero-p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--txt2);
+  line-height: 1.7;
+  max-width: 480px;
 }
 
-.base-button:hover {
-  transform: translateY(-1px);
-  opacity: 0.95;
+.hero-btns {
+  display: flex;
+  gap: 0.75rem;
 }
 
-.line {
-  border-bottom: 1px solid var(--color-line);
+.btn-p {
+  display: inline-flex;
+  align-items: center;
+  height: 2.5rem;
+  padding: 0 1.375rem;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 0 24px rgba(124, 58, 237, 0.4);
+
+  &:hover { opacity: 0.88; transform: translateY(-1px); }
+  &.large { height: 3rem; padding: 0 2rem; font-size: 1rem; }
 }
 
-@media (max-width: 768px) {
-  h1 {
-    font-size: 3rem !important;
-  }
+.btn-s {
+  display: inline-flex;
+  align-items: center;
+  height: 2.5rem;
+  padding: 0 1.375rem;
+  border-radius: 8px;
+  border: 1px solid var(--bdr);
+  background: var(--surf);
+  color: var(--txt2);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
 
-  .content {
-    margin-top: 4rem;
-    gap: 1.4rem;
-    padding: 0 1rem;
-    box-sizing: border-box;
-
-    .w-70vw {
-      width: 100% !important;
-    }
-
-    .flex.gap-10,
-    .flex.gap-14 {
-      flex-direction: column;
-    }
-
-    .text-right {
-      text-align: left !important;
-    }
-
-    .text-4xl {
-      font-size: 1.6rem !important;
-    }
-
-    .mt-30 {
-      margin-top: 2rem;
-    }
-
-    .mt-20 {
-      margin-top: 1.5rem;
-    }
-  }
-
-  .base-button {
-    width: 100%;
-    margin: 0.5rem 0;
-    height: 2.8rem;
-    font-size: 1rem;
-  }
-
-  .base-button + .base-button {
-    margin-left: 0;
-  }
-
-  .center.relative.h-14 {
-    padding: 0 1rem;
-
-    .flex.gap-10 {
-      gap: 1.5rem;
-      flex-direction: row;
-      font-size: 0.95rem;
-    }
-
-    .absolute.right-6 {
-      right: 0.5rem;
-    }
-  }
+  &:hover { color: var(--txt); border-color: var(--bdr-h); transform: translateY(-1px); }
 }
 
-@media (max-width: 480px) {
-  h1 {
-    font-size: 2.4rem !important;
-  }
+.hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
 
-  .content {
-    margin-top: 3.2rem;
-    gap: 1.2rem;
-  }
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.stat-n {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--txt);
+  letter-spacing: -0.02em;
+}
+
+.stat-l {
+  font-size: 0.72rem;
+  color: var(--txt2);
+}
+
+.stat-div {
+  width: 1px;
+  height: 2rem;
+  background: var(--bdr);
+}
+
+/* ── FLOATING CARDS ── */
+.orb {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.fcard {
+  position: absolute;
+  background: var(--surf);
+  border: 1px solid var(--bdr);
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  animation: float 5s ease-in-out infinite var(--d);
+  min-width: 140px;
+  z-index: 0;
+}
+
+.fcard-0 { top: 8%;    left: 3%; }
+.fcard-1 { top: 6%;    right: 3%; }
+.fcard-2 { bottom: 12%; left: 3%; }
+.fcard-3 { bottom: 10%; right: 3%; }
+.fcard-4 { top: 42%;   left: 2%; }
+.fcard-5 { top: 40%;   right: 2%; }
+.fcard-6 { top: 22%;   left: 18%; }
+.fcard-7 { top: 20%;   right: 18%; }
+.fcard-8 { bottom: 28%; left: 16%; }
+.fcard-9 { bottom: 26%; right: 16%; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.fcard-word {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--txt);
+  margin-bottom: 0.25rem;
+}
+
+.fcard-ph {
+  font-size: 0.72rem;
+  color: var(--accent);
+  font-family: ui-monospace, monospace;
+  margin-bottom: 0.25rem;
+}
+
+.fcard-cn {
+  font-size: 0.8rem;
+  color: var(--txt2);
+}
+
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .fcard { display: none; }
+}
+
+@media (max-width: 600px) {
+  .links { display: none; }
+  .hero-stats { flex-wrap: wrap; gap: 0.75rem; }
 }
 </style>

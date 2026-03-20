@@ -1,19 +1,24 @@
 @use 'anim' as *;
 @use 'shepherd.css';
 
+/* 防止主页 SSR 水合闪烁 */
+html, body {
+  background: #f0ece7;
+}
+
 :root {
   --color-reverse-white: white;
   --color-reverse-black: black;
-  --bg-history: white;
-  --color-item-border: rgb(226, 226, 226);
+  --bg-history: #fffcf9;
+  --color-item-border: #e2d9d0;
 
   --color-tooltip-bg: white;
   --color-font-2: rgb(46, 46, 46);
   --color-font-3: rgb(102, 116, 135);
   --color-font-active-1: white;
-  --color-scrollbar: #c1c1c1;
+  --color-scrollbar: #c8bfb5;
 
-  --color-sub-gray: #c0bfbf;
+  --color-sub-gray: #c5bdb6;
   --aside-width: 4.5rem;
 
   --article-width: 50vw;
@@ -30,49 +35,47 @@
   --word-panel-margin-left: calc(50vw + var(--aside-width) / 2 + var(--toolbar-width) / 2 + 1rem);
   --anim-time: 0.5s;
 
-  --color-input-color: black;
-  --color-input-bg: white;
-  --color-input-border: #bfbfbf;
-  --color-input-icon: #d3d4d7;
+  --color-input-color: #2d2420;
+  --color-input-bg: #fffcf9;
+  --color-input-border: #c8bfb5;
+  --color-input-icon: #d3ccc5;
 
-  --color-textarea-bg: white;
-  --color-article: black;
-
+  --color-textarea-bg: #fffcf9;
+  --color-article: #2d2420;
 
   --font-family: -apple-system, sans-serif;
   --word-font-family: ui-monospace, sans-serif;
   --en-article-family: Georgia, sans-serif;
   --zh-article-family: 'Songti SC', 'SimSun', 'Noto Serif CJK SC', serif;
 
-  --color-primary: #e6e8eb;
-  --color-primary2: white;
-  --color-second: rgb(247, 247, 247);
-  --color-third: rgb(228, 230, 232);
-  --color-fourth: rgb(218, 220, 222);
-  --color-fifth: rgb(253, 246, 236);
+  --color-primary: #f0ece7;
+  --color-primary2: #fffcf9;
+  --color-second: #faf7f3;
+  --color-third: #ede7e1;
+  --color-fourth: #e4ddd6;
+  --color-fifth: #fdf3e7;
 
-  //--color-card-active: #FED7AA;
-  --color-card-active: rgb(253, 246, 236);
-  --color-sub-text: gray;
-  --color-main-text: rgb(91, 91, 91);
-  --color-select-bg: rgb(12, 140, 233);
+  --color-card-active: #fdf3e7;
+  --color-sub-text: #9c8f85;
+  --color-main-text: #4a3f38;
+  --color-select-bg: #7a5cc4;
 
-  --color-progress-bar: #d1d5df;
+  --color-progress-bar: #ddd5cb;
 
-  --color-label-bg: whitesmoke;
-  --color-link: #2563eb;
+  --color-label-bg: #f5f0eb;
+  --color-link: #7c3aed;
 
-  --color-card-bg: white;
+  --color-card-bg: #fffcf9;
 
-  --bg-card-primary: white;
-  --bg-card-secend: rgb(247, 247, 247);
+  --bg-card-primary: #fffcf9;
+  --bg-card-secend: #faf7f3;
 
-  --bg-book: rgb(226 232 240);
+  --bg-book: #e8e0d5;
 
-  --color-line: rgb(226, 226, 226);
+  --color-line: #e2d9d0;
 
-  --color-translate-main: black;
-  --color-translate-second: #818181;
+  --color-translate-main: #2d2420;
+  --color-translate-second: #9c8f85;
 }
 
 html.dark {

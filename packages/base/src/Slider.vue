@@ -191,7 +191,7 @@ onMounted(() => {
     left: 0;
     right: 0;
     height: 6px;
-    background-color: #ddd;
+    background-color: var(--color-progress-bar, #ddd);
     border-radius: 2px;
     transform: translateY(-50%);
   }
@@ -201,7 +201,7 @@ onMounted(() => {
     top: 50%;
     left: 0;
     height: 6px;
-    background-color: #409eff;
+    background-color: var(--color-select-bg, #409eff);
     border-radius: 2px 0 0 2px;
     transform: translateY(-50%);
     pointer-events: none;
@@ -213,7 +213,7 @@ onMounted(() => {
     width: 16px;
     height: 16px;
     background-color: #fff;
-    border: 2px solid #409eff;
+    border: 2px solid var(--color-select-bg, #409eff);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     cursor: grab;
@@ -222,7 +222,7 @@ onMounted(() => {
 
   &__thumb:focus {
     outline: none;
-    box-shadow: 0 0 5px #409eff;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-select-bg, #409eff) 25%, transparent);
     cursor: grabbing;
   }
 }

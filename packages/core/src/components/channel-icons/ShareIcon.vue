@@ -137,7 +137,7 @@ const sentence = $computed(() => {
                 <div class="font-semibold text-lg">{{ userStore.user?.username }}</div>
                 <div class="">{{ dayjs().format('YYYY年MM月DD日') }}</div>
               </div>
-              <div class="ml-auto text-xs">Type Words | 英语学习</div>
+              <div class="ml-auto text-xs">WordDrill | 英语学习</div>
             </div>
 
             <div class="bg-gray-900/30 py-4 center flex-col rounded-2xl">
@@ -176,7 +176,7 @@ const sentence = $computed(() => {
           <div class="bg-gray-900/30 py-4 rounded-2xl p-4">
             <div class="flex justify-between items-end">
               <div class="space-y-2">
-                <div class="font-bold text-2xl">Type Words</div>
+                <div class="font-bold text-2xl">WordDrill</div>
                 <div class="text-base">{{ Origin }}</div>
                 <div class="text-xs">一次敲击，一点进步，开源单词学习工具</div>
               </div>

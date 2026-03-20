@@ -20,49 +20,42 @@ export default defineNuxtConfig({
   app: {
     // keepalive: true,
     head: {
-      title: 'Type Words 官网 - 词文记 | 单词跟打 · 文章跟打 · 电脑上背单词', // default fallback title
+      title: 'WordDrill - 单词打字练习 · 背单词神器', // default fallback title
       htmlAttrs: {
         lang: 'zh-CN',
       },
       meta: [
         { charset: 'UTF-8' },
-        //百度站长HTML标签验证
-        { name: 'baidu-site-verification', content: 'codeva-NoSMtV313P' },
         //搜索引擎描述
         {
           name: 'description',
           content:
-            'Type Words 官方网站 - 在线英语练习平台，支持单词、文章跟打练习，提升英语学习效率，电脑上背单词。Practice English, one strike, one step forward',
+            'WordDrill - 用打字练习记忆单词，支持 IELTS、GRE、考研、CET-6 等词库，边打字边背单词，提升英语词汇量。',
         },
-        //关键词（可选，搜索引擎基本不用，但能补充信息）
+        //关键词
         {
           name: 'keywords',
           content:
-            'Type Words, Typing Word, Type Words 官网, 电脑上背单词 , 英语打字练习, 单词跟打, 文章跟打, 键盘练习, 英语学习, 文章学习, 打字练习软件, 单词记忆工具, 英语学习软件, 背单词神器, 英语肌肉记忆, 键盘工作者, 免费英语学习, 音标发音, 默写练习, 在线学英语, CET-4, CET-6, TOEFL, IELTS, GRE, GMAT, SAT, 考研英语, 专四专八, 程序员英语, JavaScript API, Node.js API, Java API, Linux命令, 编程词汇, 技术英语, VSCode插件, 开源项目, GitHub趋势榜, V2EX热搜, Gitee GVP, 少数派推荐, 英语打字训练, WPM统计, 准确率分析, 商务英语, BEC, 雅思听力, 日语学习, 多语言学习, 英语口语练习, 单词拼写训练',
+            'WordDrill, 背单词, 单词打字练习, 英语打字, 单词记忆, IELTS词汇, GRE词汇, 考研英语, CET-6, CET-4, TOEFL, 四六级词汇, 英语学习, 打字练习, 词汇练习, 默写练习, 听写练习, 编程词汇',
         },
-        { name: 'author', content: 'zyronon' },
         { name: 'robots', content: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' },
 
-        //Open Graph（用于社交媒体分享，微信/QQ/知乎/Facebook 等）
-        { property: 'og:title', content: 'Type Words 官网 - 英语打字练习平台' },
+        //Open Graph（用于社交媒体分享）
+        { property: 'og:title', content: 'WordDrill - 单词打字练习 · 背单词神器' },
         {
           property: 'og:description',
-          content:
-            'Type Words 官方网站 - 在线英语练习平台，支持单词、文章跟打练习，提升英语学习效率，电脑上背单词。Practice English, one strike, one step forward',
+          content: 'WordDrill - 用打字练习记忆单词，支持 IELTS、GRE、考研、CET-6 等词库，边打字边背单词。',
         },
         { property: 'og:type', content: 'website' },
-        { property: 'og:url', content: 'https://typewords.cc/' },
-        { property: 'og:image', content: 'https://typewords.cc/favicon.ico' },
+        { property: 'og:url', content: 'https://worddrill.app/' },
 
-        // Twitter Card（用于 Twitter 分享）
+        // Twitter Card
         { name: 'twitter:card', content: 'summary_large_image' },
-        { name: 'twitter:title', content: 'Type Words 官网 - 英语打字练习平台' },
+        { name: 'twitter:title', content: 'WordDrill - 单词打字练习 · 背单词神器' },
         {
           name: 'twitter:description',
-          content:
-            'Type Words 官方网站 - 在线英语练习平台，支持单词、文章跟打练习，提升英语学习效率，电脑上背单词。Practice English, one strike, one step forward',
+          content: 'WordDrill - 用打字练习记忆单词，支持 IELTS、GRE、考研、CET-6 等词库，边打字边背单词。',
         },
-        { name: 'twitter:image', content: 'https://typewords.cc/favicon.ico' },
 
         //设置浏览器地址栏颜色（在 Android Chrome 特别明显
         { name: 'theme-color', content: '#818CF8' },
@@ -77,8 +70,8 @@ export default defineNuxtConfig({
         { name: 'color-scheme', content: 'light dark' },
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
-        { rel: 'canonical', href: 'https://typewords.cc/' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'canonical', href: 'https://worddrill.app/' },
         //苹果设备（iOS Safari）在用户添加到主屏时显示的图标
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/favicon.ico' },
         { rel: 'manifest', href: '/manifest.json' },
@@ -87,6 +80,7 @@ export default defineNuxtConfig({
   },
   // ssr: false,
   routeRules: {
+    '/': { ssr: false },
     '/words': { ssr: false },
     '/articles': { ssr: false },
     '/setting': { ssr: false },
@@ -152,8 +146,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.API_BASE || 'http://localhost/',
-      origin: process.env.ORIGIN || 'https://typewords.cc',
-      host: process.env.HOST || 'typewords.cc',
+      origin: process.env.ORIGIN || 'https://worddrill.app',
+      host: process.env.HOST || 'worddrill.app',
       latestCommitHash: latestCommitHash + (process.env.NODE_ENV === 'production' ? '' : ' (dev)'),
     },
   },
