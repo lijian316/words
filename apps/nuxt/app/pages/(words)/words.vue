@@ -1078,6 +1078,15 @@ $spine-colors: #7bbf9e;
   gap: 0.5rem;
 }
 
+@media (max-width: 768px) {
+  .top-entries {
+    position: static;
+    justify-content: flex-end;
+    margin-bottom: 0.5rem;
+    padding-right: 0.25rem;
+  }
+}
+
 .setting-entry {
   position: static;
   width: 2.2rem;

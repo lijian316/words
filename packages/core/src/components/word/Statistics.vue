@@ -142,7 +142,7 @@ calcWeekList() // 新增：计算本周学习记录
 
 <template>
   <Dialog v-model="model" :close-on-click-bg="false" :header="false" :keyboard="false" :show-close="false">
-    <div class="p-8 pr-3 bg-[var(--bg-card-primary)] rounded-2xl space-y-6">
+    <div class="stat-wrap p-4 md:p-8 bg-[var(--bg-card-primary)] rounded-2xl space-y-4 md:space-y-6">
       <!-- Header Section -->
       <div class="text-center relative">
         <div
@@ -217,10 +217,9 @@ calcWeekList() // 新增：计算本周学习记录
             </div>
           </div>
         </div>
-        <ChannelIcons />
       </div>
       <!-- Action Buttons -->
-      <div class="flex min-w-130 justify-center">
+      <div class="flex stat-actions justify-center">
         <BaseButton
           :keyboard="settingStore.shortcutKeyMap[ShortcutKey.RepeatChapter]"
           @click="options(EventKey.repeatStudy)"
@@ -337,8 +336,33 @@ calcWeekList() // 新增：计算本周学习记录
 }
 </style>
 
-<style scoped>
+<style scoped lang="scss">
 .item {
   @apply bg-[var(--bg-card-secend)] rounded-xl p-2 text-center border border-gray-100;
+}
+
+.stat-actions {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .stat-wrap {
+    padding: 1rem !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .stat-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+
+    :deep(.base-button) {
+      width: 100%;
+      margin-left: 0 !important;
+      justify-content: center;
+    }
+  }
 }
 </style>

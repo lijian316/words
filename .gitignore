@@ -39,4 +39,4 @@ report.html
 !.env.example
 public/vscode
 apps/electron
-apps/nuxt/public/dicts
+apps/nuxt/public/dicts/en/word
