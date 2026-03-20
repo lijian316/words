@@ -1,134 +1,84 @@
-<h1 align=center>
-  <img src="https://github.com/user-attachments/assets/9d626e0f-0601-4640-8981-ad66d8ac4853" alt="TypeWords" style="width: 500px;"/>
-</h1>
+<h1 align="center">WordDrill</h1>
 
 <p align="center">
-  <a href="/README.md">English</a> |
-  <a href="/docs/README.es.md">Español</a> |
-  <a href="/docs/README.de.md">Deutsch</a> |
-  <a href="/docs/README.fr.md">Français</a> |
-  <a href="/docs/README.pt.md">Português</a> |
-  <a href="/docs/README.ru.md">Русский</a> |
-  <a href="/docs/README.uk.md">Українська</a> |
-  <a href="/docs/README.ja.md">日本語</a> |
-  <a href="/docs/README.ko.md">한국인</a> |
-  <a href="/docs/README.th.md">ไทย</a> |
-  <a href="/docs/README.vi.md">Tiếng Việt</a> |
-  <a href="/docs/README.id.md">Bahasa Indonesia</a> |
-  <a href="/docs/README.zh-TW.md">繁體中文</a> |
-  <a href="/docs/README.zh-CN.md">简体中文</a> 
+  <b>在线英语打字练习平台 · 单词跟打 · 文章精读 · 背单词神器</b>
 </p>
 
-<p align="center">
-  <b>Learn English, one keystroke at a time; smarter memorization, more efficient learning - an open-source word and article practice tool</b>
-</p>
+---
 
-## Online Access
+## 在线体验
 
-[https://typewords.cc](https://typewords.cc)
+部署于 Vercel，访问即用，无需注册。
 
-<img width="1920" height="1440" alt="practice words" src="/apps/nuxt/public/imgs/words.png" />
-<img width="1920" height="1440" alt="practice articles" src="/apps/nuxt/public/imgs/articles.png" />
+## 功能特性
 
-## Features
+### 单词练习
 
-### Word Practice
+- 练习模式：跟打 / 听写 / 自测 / 默写
+- 智能模式：基于记忆曲线自动计算学习单词，通过听写加深记忆
+- 自由模式：无限制，自由安排学习计划
+- 提供音标、发音（美音/英音）、例句、短语、近义词、词根、词源、错误统计等
 
-- Practice modes: Follow-along / Dictation / Self-test / Spelling from memory
-- Smart mode: Automatically calculates learning words based on memory curves, deepening memory through dictation
-- Free mode: No restrictions, plan your own learning
-- Provides phonetics, pronunciation (American/British), example sentences, phrases, synonyms, root words, etymology, error statistics, and more
+### 文章精读
 
-### Article Memorization
+- 内置新概念英语等经典教材；支持自定义添加文章，一键翻译和双语对照
+- 文章列表以聊天气泡形式展示，点击进入对话式阅读视图（左右交替布局）
+- 支持音频跟读，自动播放下一篇
+- 显示每篇文章的学习记录（已学习时长）
 
-- Built-in classic textbooks; you can also add or import articles with one-click translation and bilingual comparison
-- Follow-along + dictation dual modes, sentence-by-sentence input with automatic pronunciation for more efficient memorization
-- Supports listening while writing from memory to reinforce learning
+### 词典 / 书籍浏览
 
-### Favorites, Wrong Words, Mastered
+- 词典列表、书籍列表采用统一气泡列表样式，支持搜索和标签筛选
+- 词典页无限滚动加载（每次 50 个），进度指示器实时显示当前加载进度
+- 全站隐藏滚动条，向下箭头提示可滚动区域
 
-- Words typed incorrectly while learning are automatically added to your wrong word book for later review
-- Actively add words to mastered to automatically skip them in future sessions
-- Add words to favorites for consolidation and review
+### 生词本 / 错词本 / 已掌握
 
-### Highly Customizable
+- 练习中输入错误的单词自动加入错词本，便于后续复习
+- 主动将单词加入"已掌握"，后续学习自动跳过
+- 收藏单词，方便巩固复习
 
-- Rich keyboard sound effects
-- Customizable shortcuts
-- Highly configurable settings
+### 高度可定制
 
-### Clean and Efficient
+- 丰富的键盘音效
+- 可自定义快捷键
+- 丰富的设置项
 
-- Clean design, modern UI, ad-free
-- Refreshing interface, simple operation
-- No forced subscription to any platform
+### 简洁高效
 
-### Vocabulary Library
+- 简洁设计，现代 UI，无广告
+- 数据本地存储，无需注册，切换设备手动备份即可
 
-Built-in commonly used vocabulary including CET-4, CET-6, GMAT, GRE, IELTS, SAT, TOEFL, Graduate English, TEM-4, TEM-8, and more.
-Designed to meet most users' vocabulary learning needs. Community contributions of additional vocabulary are welcome.
+## 内置词库
 
-## Running the Project
+CET-4、CET-6、GMAT、GRE、IELTS、SAT、TOEFL、考研英语、专四、专八等，满足大多数用户的词汇学习需求。
 
-#### Note: This project can run standalone with data saved locally. Manual backup is required when switching devices; this does not affect normal usage.
+## 本地运行
 
-### Option 1: Using Docker (Recommended)
-
-The easiest way to run TypeWords is using Docker:
+本项目基于 `Nuxt` 构建，需要 Node.js 环境。
 
 ```bash
-# Pull the image from Docker Hub
-docker pull zyronon/typewords:latest
+# 克隆仓库
+git clone --depth 1 https://github.com/lijian316/words.git
+cd words
 
-# Run the container
-docker run -d -p 3000:80 --name typewords zyronon/typewords:latest
+# 安装依赖
+pnpm install
+
+# 启动开发服务器（http://localhost:5567）
+pnpm run dev
+
+# 构建生产版本
+pnpm run generate
 ```
 
-Then open [`http://localhost:3000`](http://localhost:3000) in your browser to access the project.
+## 技术栈
 
-Or use Docker Compose:
+- [Nuxt 3](https://nuxt.com/) + [Vue 3](https://vuejs.org/)
+- [Pinia](https://pinia.vuejs.org/) 状态管理
+- SCSS + CSS 变量主题系统
+- 部署于 [Vercel](https://vercel.com/)
 
-```bash
-# Start with docker-compose
-docker-compose up -d
+## License
 
-# Stop the service
-docker-compose down
-```
-
-Or build and run locally:
-
-```bash
-# Build the Docker image
-docker build -t typewords .
-
-# Run the container
-docker run -d -p 3000:80 --name typewords typewords
-```
-
-### Option 2: Running from Source
-
-This project is built with `Nuxt` and requires a Node.js environment.
-
-1. Install NodeJS, refer to the [official documentation](https://nodejs.org/en/download)
-2. The project is large. It's recommended to use `git clone --depth 1 https://github.com/zyronon/TypeWords.git` to clone only the latest commit. GitHub's Download ZIP feature will not work properly.
-3. In the project root directory, open a terminal and run `pnpm install` to download dependencies.
-4. Run `pnpm run dev` to start the project. The default address is [`http://localhost:5567`](http://localhost:5567)
-5. Open [`http://localhost:5567`](http://localhost:5567) in your browser to access the project.
-6. Run `pnpm run generate` to build the project files.
-
-## Features and Suggestions
-
-The project is currently in early development, with new features being added continuously. If you have any suggestions or feature requests, feel free to open an `Issue`.
-If you like the design philosophy of this software, please submit a `PR`. Thank you for your support!
-
-## Contributing Guide
-
-[Contributing Guidelines](/docs/CONTRIBUTING.md)
-
-If you're interested in this project, we welcome your contributions and will provide as much help as possible.
-
-Before contributing, please communicate with the developers to avoid code conflicts.
-
-Thank you again for your contributions!
-
+MIT
