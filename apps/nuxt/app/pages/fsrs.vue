@@ -296,7 +296,9 @@ function hideTip() { tooltip = null }
   padding: 1.5rem 2rem;
   box-sizing: border-box;
   height: calc(100vh - 3rem);
-  overflow-y: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .page-heading-row {
@@ -465,8 +467,10 @@ function hideTip() { tooltip = null }
 }
 
 .table-container {
-  max-height: 50vh;
-  overflow-x: auto;
+  flex: 1;
+  overflow: auto;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
   border-radius: 8px;
   border: 1px solid var(--color-item-border);
 
